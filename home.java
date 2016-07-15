@@ -43,6 +43,8 @@ public class home extends Application {
         Button b6=new Button("");
         Button b7=new Button("");
         Button b8=new Button("");
+        Button b9=new Button("");
+        Button b10=new Button("");
         b1.setId("btnstyle");
         b2.setId("btnstyle");
         b3.setId("btnstyle");
@@ -51,6 +53,8 @@ public class home extends Application {
         b6.setId("btnstyle");
         b7.setId("btnstyle");
         b8.setId("btnstyle");
+        b9.setId("btnstyle");
+        b10.setId("btnstyle");
         b1.setStyle("-fx-background-image: url('images/supplier.png');-fx-background-size: cover;");
         b2.setStyle("-fx-background-image: url('images/customer-service.png');-fx-background-size: cover;");
         b3.setStyle("-fx-background-image: url('images/company.jpg');-fx-background-size: cover;");
@@ -59,6 +63,8 @@ public class home extends Application {
         b6.setStyle("-fx-background-image: url('images/reports.png');-fx-background-size: cover;");
         b7.setStyle("-fx-background-image: url('images/sales.png');-fx-background-size: cover;");
         b8.setStyle("-fx-background-image: url('images/settings.png');-fx-background-size: cover;");
+        b9.setStyle("-fx-background-image: url('images/sales.png');-fx-background-size: cover;");
+        b10.setStyle("-fx-background-image: url('images/settings.png');-fx-background-size: cover;");
         grid1.setAlignment(Pos.CENTER);
         grid1.add(b1, 0, 0);
         grid1.add(b2, 1, 0);
@@ -68,21 +74,24 @@ public class home extends Application {
         grid1.add(b5, 1, 1);
         grid1.add(b6, 2, 1);
         grid1.add(b8, 3, 1);
+         grid1.add(b9, 4, 0);
+        grid1.add(b10, 4, 1);
         BorderPane root = new BorderPane();
         root.setTop(menuBar);
         root.setCenter(grid1);
-        b1.setOnAction((event) -> {
-            Stage cust= new Stage();
-            
-            customer ccc=new customer();
-            ccc.start(cust);
-        });
         Scene scene = new Scene(root, 300, 250);
         String css =this.getClass().getResource("home.css").toExternalForm();
         scene.getStylesheets().add(css);
         
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        
+        b1.setOnAction((event) -> {
+            supplier supp=new supplier();
+            supp.start(primaryStage);
+        });
+        b2.setOnAction((event) -> {
+            customer co=new customer();
+            co.start(primaryStage);
+        });
         //set Stage boundaries to visible bounds of the main screen
         primaryStage.setX(primaryScreenBounds.getMinX());
         primaryStage.setY(primaryScreenBounds.getMinY());

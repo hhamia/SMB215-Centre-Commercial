@@ -1,5 +1,8 @@
 package stock;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -98,6 +101,12 @@ public class FadeApp extends Application {
         mainStage = new Stage(StageStyle.DECORATED);
         Stock stk=new Stock();
         stk.start(mainStage);
+        /*try {
+            Process process = new ProcessBuilder("C:\\BEE2\\Bee\\Projects\\Bee\\Bee.exe","param1","param2").start();
+        } catch (IOException ex) {
+            Logger.getLogger(FadeApp.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+
         
     }
 
