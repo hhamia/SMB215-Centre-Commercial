@@ -1,0 +1,29 @@
+.root {
+    -fx-background-image: url("back1.jpg");
+    -fx-background-size: cover;
+}
+#btnstyle {
+   -fx-background-color: 
+        #3c7fb1,
+        linear-gradient(#fafdfe, #e8f5fc),
+        linear-gradient(#eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 3,2,1;
+    -fx-padding: 100 100 100 100;
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+}
+#btnstyle:pressed {
+    -fx-padding: 100 100 100 100;
+    -fx-background-insets: 2 0 0 0,2 0 3 0, 2 0 4 0, 2 0 5 0;
+}
+#btnstyle:hover {
+    -fx-background-color: 
+        #3c7fb1,
+        linear-gradient(#fafdfe, #e8f5fc),
+        linear-gradient(#eaf61d 0%, #d9fffc 49%, #bre6fd 50%, #a7d9f5 100%);
+    
+}
+#l1{
+    -fx-background-color: gray;
+}
