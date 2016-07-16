@@ -33,6 +33,7 @@ import javafx.util.Callback;
 import org.w3c.dom.Document;
 import java.io.IOException;
 import java.util.Locale;
+import javafx.css.PseudoClass;
 import org.xml.sax.SAXException;
 public class customer extends Application {
     
@@ -95,7 +96,9 @@ public class customer extends Application {
         TextField t9=new TextField();
         TextField t10=new TextField();
         TextField t11=new TextField();
-         
+         final PseudoClass errorClass = PseudoClass.getPseudoClass("error");
+
+
          
         ComboBox<String> c1=new ComboBox<>();
         
@@ -115,6 +118,9 @@ public class customer extends Application {
         c2.getSelectionModel().selectFirst();
         
          save.setOnAction((event) -> {
+             if ("".equals(t2.getText())){
+             t2.getStyleClass().add("error");
+         }
              String fname=t2.getText();
          String company=t3.getText();
          String stt1=t4.getText();
