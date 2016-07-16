@@ -26,7 +26,7 @@ l'objectif de cette application et de gère les produit de chaque point d'achat 
 -Imprimer factures, Imprimer un reçu
  -le rattachement d’indicateurs à chaque produit suivi en stock : stock minimum, stock maximum,
 -une partie comptabilité pour chaque point d'achat.
- 
+  
 2-Application web
 cette application a pour but ,création de page web pour chaque point d'achat et elle permet de:
 -Présentation des produits sur la page web.
