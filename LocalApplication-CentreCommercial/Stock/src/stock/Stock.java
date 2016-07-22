@@ -43,7 +43,7 @@ public class Stock extends Application {
     TextField user=new TextField();
     PasswordField pass=new PasswordField();
     @Override
-    public void start(Stage primaryStage) {
+    public void start( Stage primaryStage) {
         
         Label welcome=new Label("Welcome");
         Label username=new Label("username");
@@ -130,7 +130,7 @@ public class Stock extends Application {
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "SELECT username,password FROM employer WHERE username = ? and password = ?";
+        String selectSQL = "SELECT username,password FROM users WHERE username = ? and password = ? and type='admin'";
         
         try {
             dbConnection = connection.getDBConnection();
@@ -176,9 +176,10 @@ public class Stock extends Application {
         else{
             try {
                 if(checkusers(user.getText(), pass.getText())==true){
-                    Stage primaryStage = new Stage(StageStyle.DECORATED);
+                    Stage homeStage = new Stage(StageStyle.DECORATED);
                     home ho=new home();
-                    ho.start(primaryStage);
+                    ho.start(homeStage);
+                    
                 }
                 else{
                     result.setText("incorrect username or password");

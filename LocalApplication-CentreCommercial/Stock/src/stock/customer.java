@@ -1,5 +1,6 @@
 package stock;
 
+import java.io.File;
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -30,17 +31,37 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.w3c.dom.Document;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Locale;
 import javafx.css.PseudoClass;
-import org.xml.sax.SAXException;
+import javafx.stage.FileChooser;
+import javafx.stage.StageStyle;
 public class customer extends Application {
-    
-    private TableView<Person> table = new TableView<Person>();
+    ObservableList<company.Person> data1 =company.data1;
+    ObservableList<family.Person> data2 =family.data2;
+    Connection dbConnection = null;
+    Stage compStage=new Stage(StageStyle.DECORATED);
+    Stage famStage=new Stage(StageStyle.DECORATED);
+    GridPane grid1=new GridPane();
+    String imagepath="";
+    PreparedStatement preparedStatement = null;
+    PreparedStatement preparedStatement1 = null;
+    PreparedStatement preparedStatement2 = null;
+    private final TableView<Person> table = new TableView<Person>();
     private final ObservableList<Person> data =
             FXCollections.observableArrayList();
-    
+    TextField t2=new TextField();
+        TextField t3=new TextField();
+        TextField t4=new TextField();
+        TextField t5=new TextField();
+        TextField t6=new TextField();
+        TextField t7=new TextField();
+        TextField t8=new TextField();
+        TextField t9=new TextField();
+        TextField t10=new TextField();
+        TextField t11=new TextField();
     final HBox hb = new HBox();
     
     public static void main(String[] args) {
@@ -63,11 +84,22 @@ public class customer extends Application {
         
         Image img1 = new Image("images/stockIcon.png");
         ImageView imgview1=new ImageView(img1);
-        imgview1.setFitHeight(300);
-        imgview1.setFitWidth(300);
+        imgview1.setFitHeight(150);
+        imgview1.setFitWidth(150);
+        Button addimage=new Button("add image");
+        addimage.setOnAction((event) -> {
+            FileChooser chooser = new FileChooser();
+    chooser.setTitle("Open File");
+    File file = chooser.showOpenDialog(new Stage());
+    if(file != null) {
+         imagepath = file.getPath();
         
+        Image image = new Image("file:///"+imagepath);
+        imgview1.setImage(image);
+    }           
+        });
         VBox v1=new VBox();
-        GridPane grid1=new GridPane();
+        
         grid1.setVgap(10);grid1.setHgap(10);
         Label l1=new Label("Personnal Information");
         l1.setId("l1");
@@ -86,16 +118,7 @@ public class customer extends Application {
         Label l12=new Label("Country");
         Label l13=new Label("Type");
         
-        TextField t2=new TextField();
-        TextField t3=new TextField();
-        TextField t4=new TextField();
-        TextField t5=new TextField();
-        TextField t6=new TextField();
-        TextField t7=new TextField();
-        TextField t8=new TextField();
-        TextField t9=new TextField();
-        TextField t10=new TextField();
-        TextField t11=new TextField();
+        
          final PseudoClass errorClass = PseudoClass.getPseudoClass("error");
 
 
@@ -112,16 +135,33 @@ public class customer extends Application {
             c1.getSelectionModel().selectFirst();
             c1.setEditable(true);
         }
-        ComboBox<String> c2 = new ComboBox<>(FXCollections.observableArrayList("فردي","شركة","عائلة"));
+        ComboBox<String> c2 = new ComboBox<>(FXCollections.observableArrayList("Simgle","Company","Family"));
         
          
         c2.getSelectionModel().selectFirst();
+        c2.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue ov, Object t, Object t1) {
+                if("Company".equals(c2.getValue())){
+                company cop=new company();
+                cop.start(compStage);
+                }
+                 if("Family".equals(c2.getValue())){
+                family fam=new family();
+                fam.start(famStage);
+                }
+            }
+        });
         
-         save.setOnAction((event) -> {
-             if ("".equals(t2.getText())){
-             t2.getStyleClass().add("error");
-         }
-             String fname=t2.getText();
+        save.setOnAction((event) -> {
+            
+        
+         
+          if(checkrequiredField()==true){
+              
+          }   
+          else{
+         String fname=t2.getText();
          String company=t3.getText();
          String stt1=t4.getText();
          String city=t5.getText();
@@ -134,8 +174,73 @@ public class customer extends Application {
          String country=c1.getValue();
          String type=c2.getValue();
              data.add(new Person(fname, company, stt1,city,zip,fax,lname,phone,stt2,sp,country,type));
+          String insertSQL = "INSERT INTO `customer`(`fname`, `lname`, `company`, "
+                  + "`phone`, `str1`, `str2`, `city`, `state`, `zip`, `country`, `fax`, `type`, `picture`)"
+                  + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+          String insertSQL1 ="INSERT INTO `company`(`customerPhone`,`fname`, `lastName`, `phone`)"
+                  + " VALUES (?,?,?,?)";
+           String insertSQL2 ="INSERT INTO `family`(`customerPhone`,`fname`, `lastName`, `phone`)"
+                  + " VALUES (?,?,?,?)";
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(insertSQL);
+            preparedStatement1 = dbConnection.prepareStatement(insertSQL1);
+            preparedStatement2 = dbConnection.prepareStatement(insertSQL2);
+            preparedStatement.setString(1, fname);
+            preparedStatement.setString(2, lname);
+            preparedStatement.setString(3, company);
+            preparedStatement.setString(4, phone);
+            preparedStatement.setString(5, stt1);
+            preparedStatement.setString(6, stt2);
+            preparedStatement.setString(7, city);
+            preparedStatement.setString(8, sp);
+            preparedStatement.setString(9, zip);
+            preparedStatement.setString(10, country);
+            preparedStatement.setString(11, fax);
+            preparedStatement.setString(12, type);
+            preparedStatement.setString(13, imagepath);
+             
+            
+                 int rs = preparedStatement.executeUpdate();
+            if(data1.size()>0){     
+            for(int i=0;i<data1.size();i++){
+                preparedStatement1.setString(1, phone);
+                preparedStatement1.setString(2, data1.get(i).getFirstName());
+                preparedStatement1.setString(3, data1.get(i).getLastName());
+                preparedStatement1.setString(4, data1.get(i).getPhone());
+                
+                int rs1 = preparedStatement1.executeUpdate();
+            }
+            }
+             if(data2.size()>0){     
+            for(int i=0;i<data2.size();i++){
+                preparedStatement2.setString(1, phone);
+                preparedStatement2.setString(2, data2.get(i).getFirstName());
+                preparedStatement2.setString(3, data2.get(i).getLastName());
+                preparedStatement2.setString(4, data2.get(i).getPhone());
+                
+                int rs2 = preparedStatement2.executeUpdate();
+            }
+            }
+            clearFields();
+            resetrequiredField();
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+           
+        } finally {
+            
+          
+            
+        }   
+          }
         });
-       
+         
+       clear.setOnAction((event) -> {
+         clearFields();
+         resetrequiredField();
+       });
         grid1.add(l2, 1, 1);grid1.add(l8, 3, 1);
         grid1.add(l3, 1, 2);grid1.add(l9, 3, 2);
         grid1.add(l4, 1, 3);grid1.add(l10, 3, 3);
@@ -151,7 +256,8 @@ public class customer extends Application {
         grid1.add(save, 5, 1);grid1.add(clear, 5, 2);
         v1.getChildren().add(l1);
         v1.getChildren().add(grid1);
-        des.getChildren().addAll(v1,dess,imgview1);
+        des.getChildren().addAll(v1,dess,imgview1,addimage);
+        
         Scene scene = new Scene(new Group());
         stage.setTitle("Customer");
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -377,8 +483,104 @@ public class customer extends Application {
         stage.getIcons().add(ico);
         stage.setScene(scene);
         stage.show();
+        
+        
+    }
+
+    private void clearFields() {
+  t2.setText("");
+  t3.setText("");
+  t4.setText("");
+  t5.setText("");
+  t6.setText("");
+  t7.setText("");
+  t8.setText("");
+  t9.setText("");
+  t10.setText("");
+  t11.setText("");
+  
+}
+    private boolean checkrequiredField(){
+        if("".equals(t2.getText())){
+            t2.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t2.requestFocus();
+            return true;
+        }
+        else if("".equals(t3.getText())){
+            t3.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t3.requestFocus();
+            return true;
+        }
+        else if("".equals(t4.getText())){
+            t4.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t4.requestFocus();
+            return true;
+        }
+        else if("".equals(t5.getText())){
+            t5.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t5.requestFocus();
+            return true;
+        }
+        else if("".equals(t6.getText())){
+            t6.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t6.requestFocus();
+            return true;
+        }
+        else if("".equals(t7.getText())){
+            t7.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t7.requestFocus();
+            return true;
+        }
+        else if("".equals(t8.getText())){
+            t8.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t8.requestFocus();
+            return true;
+        }
+        else if("".equals(t9.getText())){
+            t9.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t9.requestFocus();
+            return true;
+        }
+        else if("".equals(t10.getText())){
+            t10.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t10.requestFocus();
+            return true;
+        }
+        else if("".equals(t11.getText())){
+            t11.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            t11.requestFocus();
+            return true;
+        }
+        else{
+            return false;
+        }
+        
     }
     
+     private void resetrequiredField(){
+       
+            t2.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+         
+            t3.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+          
+            t4.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+          
+            t5.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+            t6.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+            t7.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+            t8.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+            t9.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+            
+            t10.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+            t11.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+           
+        
+    }
 
     public static class Person {
         
@@ -570,6 +772,7 @@ public class customer extends Application {
         private String getString() {
             return getItem() == null ? "" : getItem().toString();
         }
+        
     }
     
 }

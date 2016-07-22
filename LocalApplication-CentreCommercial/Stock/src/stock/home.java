@@ -4,17 +4,19 @@ package stock;
 
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -23,15 +25,33 @@ import javafx.stage.Stage;
  * @author skynete10
  */
 public class home extends Application {
+    private final Label label[]=new Label[10];
+    private final Label toplabel=new Label("Stock Soft");
+    final VBox vv=new VBox();
+    String label_name[]=new String[]{"customer","salesman","company","sales","settings","invoice"
+    ,"reports","dashboard","stock","chat settings"};
     
     @Override
     public void start(Stage primaryStage) {
+        toplabel.setId("toplabel");
+        for (int i = 0; i < label.length; i++) {
+            label[i]=new Label(label_name[i]);  
+        }
+        Label bottlabel=new Label("skynete");
+        
+        GridPane togrid=new GridPane();
+        toplabel.setAlignment(Pos.CENTER);
+        togrid.setAlignment(Pos.CENTER);
+        togrid.add(toplabel, 1, 4);
         final Menu menu1 = new Menu("File");
         final Menu menu2 = new Menu("Options");
         final Menu menu3 = new Menu("Help");
-        
+        final Tooltip tooltip1 = new Tooltip();
+        tooltip1.setText("Customer page");
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(menu1, menu2, menu3);
+        vv.getChildren().add(menuBar);
+        vv.getChildren().add(togrid);
         GridPane grid1=new GridPane();
         grid1.setHgap(10);
         grid1.setVgap(10);
@@ -46,6 +66,7 @@ public class home extends Application {
         Button b9=new Button("");
         Button b10=new Button("");
         b1.setId("btnstyle");
+        b1.setTooltip(tooltip1);
         b2.setId("btnstyle");
         b3.setId("btnstyle");
         b4.setId("btnstyle");
@@ -62,30 +83,43 @@ public class home extends Application {
         b5.setStyle("-fx-background-image: url('images/money.png');-fx-background-size: cover;");
         b6.setStyle("-fx-background-image: url('images/reports.png');-fx-background-size: cover;");
         b7.setStyle("-fx-background-image: url('images/sales.png');-fx-background-size: cover;");
-        b8.setStyle("-fx-background-image: url('images/settings.png');-fx-background-size: cover;");
-        b9.setStyle("-fx-background-image: url('images/sales.png');-fx-background-size: cover;");
-        b10.setStyle("-fx-background-image: url('images/settings.png');-fx-background-size: cover;");
+        b8.setStyle("-fx-background-image: url('images/stock-icon.png');-fx-background-size: cover;");
+        b9.setStyle("-fx-background-image: url('images/settings.png');-fx-background-size: cover;");
+        b10.setStyle("-fx-background-image: url('images/chat-2-icon.png');-fx-background-size: cover;");
         grid1.setAlignment(Pos.CENTER);
         grid1.add(b1, 0, 0);
         grid1.add(b2, 1, 0);
         grid1.add(b3, 2, 0);
         grid1.add(b7, 3, 0);
-        grid1.add(b4, 0, 1);
-        grid1.add(b5, 1, 1);
-        grid1.add(b6, 2, 1);
-        grid1.add(b8, 3, 1);
-         grid1.add(b9, 4, 0);
-        grid1.add(b10, 4, 1);
+        grid1.add(b9, 4, 0);
+        grid1.add(b4, 0, 2);
+        grid1.add(b5, 1, 2);
+        grid1.add(b6, 2, 2);
+        grid1.add(b8, 3, 2);
+        grid1.add(b10, 4, 2);
+        for (int i=0;i<5;i++){
+            grid1.add(label[i], i, 1);
+            label[i].setId("titles");
+            
+        }
+        for (int i=5;i<10;i++){
+            grid1.add(label[i], i-5, 3);
+            label[i].setId("titles");
+            
+        }
+        
         BorderPane root = new BorderPane();
-        root.setTop(menuBar);
+        root.setTop(vv);
         root.setCenter(grid1);
+        root.setBottom(bottlabel);
         Scene scene = new Scene(root, 300, 250);
         String css =this.getClass().getResource("home.css").toExternalForm();
         scene.getStylesheets().add(css);
         
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        grid1.setPrefHeight(primaryScreenBounds.getHeight());
         b1.setOnAction((event) -> {
-            supplier supp=new supplier();
+           supplier supp=new supplier();
             supp.start(primaryStage);
         });
         b2.setOnAction((event) -> {

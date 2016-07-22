@@ -6,7 +6,6 @@
 package stock;
 
 import com.sun.javafx.font.freetype.HBGlyphLayout;
-<<<<<<< HEAD
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,8 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-=======
->>>>>>> origin/master
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -32,10 +29,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
-<<<<<<< HEAD
 import javafx.scene.input.KeyCode;
-=======
->>>>>>> origin/master
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -52,7 +46,6 @@ public class saleItem extends Application {
             FXCollections.observableArrayList();
     Pane panel1=new Pane();
     Label Total=new Label("Total");
-<<<<<<< HEAD
     int itemqty;
   @Override
     public void start(Stage primaryStage) {
@@ -61,13 +54,6 @@ public class saleItem extends Application {
         
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         
-=======
-    
-  @Override
-    public void start(Stage primaryStage) {
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        data.add(new items("asd", 1, 1, "asd"));
->>>>>>> origin/master
         VBox vbox1=new VBox();
         HBox hbox1=new HBox();
         hbox1.setPrefHeight(50);
@@ -99,11 +85,8 @@ public class saleItem extends Application {
         grid1.add(text3, 6, 1);
         grid1.add(btn2, 7, 1);
         hbox2.getChildren().add(grid1);
-<<<<<<< HEAD
         //Adding the Button to the cell
         
-=======
->>>>>>> origin/master
         table.setPrefWidth(primaryScreenBounds.getWidth());
       table.setPrefHeight(primaryScreenBounds.getHeight()/1.5);
       TableColumn Itemnamecol=new TableColumn("Item Name");
@@ -129,15 +112,12 @@ public class saleItem extends Application {
         BorderPane root = new BorderPane();
         TextField barItem=new TextField();
          barItem.setOnAction((event) -> {
-<<<<<<< HEAD
             try {
                 selectRecordsFromTable(barItem.getText());
                 updatetotable(barItem.getText());
             } catch (SQLException ex) {
                 Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
             }
-=======
->>>>>>> origin/master
           
          });
         vbox1.getChildren().add(barItem);
@@ -149,15 +129,10 @@ public class saleItem extends Application {
         vbox1.getChildren().add(hbox2);
         root.setTop(vbox1);
         Scene scene = new Scene(root, 800, 550);
-<<<<<<< HEAD
          
         String css =this.getClass().getResource("items.css").toExternalForm();
         scene.getStylesheets().add(css);
         
-=======
-        String css =this.getClass().getResource("items.css").toExternalForm();
-        scene.getStylesheets().add(css);
->>>>>>> origin/master
         primaryStage.setX(primaryScreenBounds.getMinX());
         primaryStage.setY(primaryScreenBounds.getMinY());
         primaryStage.setWidth(primaryScreenBounds.getWidth());
@@ -217,7 +192,6 @@ public class saleItem extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-<<<<<<< HEAD
    void selectRecordsFromTable(String S) throws SQLException {
 
 		Connection dbConnection = null;
@@ -309,7 +283,4 @@ if(code==KeyEvent.VK_ENTER ){
 
 	}
 
-=======
-    
->>>>>>> origin/master
 }
