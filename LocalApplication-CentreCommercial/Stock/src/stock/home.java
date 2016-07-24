@@ -37,7 +37,7 @@ public class home extends Application {
         for (int i = 0; i < label.length; i++) {
             label[i]=new Label(label_name[i]);  
         }
-        Label bottlabel=new Label("skynete");
+     
         
         GridPane togrid=new GridPane();
         toplabel.setAlignment(Pos.CENTER);
@@ -111,7 +111,7 @@ public class home extends Application {
         BorderPane root = new BorderPane();
         root.setTop(vv);
         root.setCenter(grid1);
-        root.setBottom(bottlabel);
+
         Scene scene = new Scene(root, 300, 250);
         String css =this.getClass().getResource("home.css").toExternalForm();
         scene.getStylesheets().add(css);
