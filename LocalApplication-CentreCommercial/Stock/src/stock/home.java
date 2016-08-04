@@ -3,6 +3,9 @@ package stock;
 
 
 
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -19,25 +22,24 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
-/**
- *
- * @author skynete10
- */
 public class home extends Application {
     private final Label label[]=new Label[10];
-    private final Label toplabel=new Label("Stock Soft");
+    Stage addItemsStage=new Stage(StageStyle.DECORATED);
+    public final static Label toplabel=new Label("Stock Soft");
     final VBox vv=new VBox();
-    String label_name[]=new String[]{"customer","salesman","company","sales","settings","invoice"
-    ,"reports","dashboard","stock","chat settings"};
+    String label_name[]=new String[]{"Customer","Salesman","Items","Sales","Settings","invoice"
+    ,"Reports","Dashboard","Stock","Chat Settings"};
     
     @Override
     public void start(Stage primaryStage) {
         toplabel.setId("toplabel");
         for (int i = 0; i < label.length; i++) {
-            label[i]=new Label(label_name[i]);  
+            label[i]=new Label(label_name[i]); 
+            label[i].setAlignment(Pos.CENTER);
         }
-     
+        Label bottlabel=new Label("skynete");
         
         GridPane togrid=new GridPane();
         toplabel.setAlignment(Pos.CENTER);
@@ -78,7 +80,7 @@ public class home extends Application {
         b10.setId("btnstyle");
         b1.setStyle("-fx-background-image: url('images/supplier.png');-fx-background-size: cover;");
         b2.setStyle("-fx-background-image: url('images/customer-service.png');-fx-background-size: cover;");
-        b3.setStyle("-fx-background-image: url('images/company.jpg');-fx-background-size: cover;");
+        b3.setStyle("-fx-background-image: url('images/Add-item-icon.png');-fx-background-size: cover;");
         b4.setStyle("-fx-background-image: url('images/invoice-md.png');-fx-background-size: cover;");
         b5.setStyle("-fx-background-image: url('images/money.png');-fx-background-size: cover;");
         b6.setStyle("-fx-background-image: url('images/reports.png');-fx-background-size: cover;");
@@ -111,7 +113,7 @@ public class home extends Application {
         BorderPane root = new BorderPane();
         root.setTop(vv);
         root.setCenter(grid1);
-
+        root.setBottom(bottlabel);
         Scene scene = new Scene(root, 300, 250);
         String css =this.getClass().getResource("home.css").toExternalForm();
         scene.getStylesheets().add(css);
@@ -126,11 +128,24 @@ public class home extends Application {
             customer co=new customer();
             co.start(primaryStage);
         });
+        b3.setOnAction((event) -> {
+            addItems it=new addItems();
+            try {
+                it.start(addItemsStage);
+            } catch (SQLException ex) {
+                Logger.getLogger(home.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        b7.setOnAction((event) -> {
+            saleItem sl=new saleItem();
+            sl.start(addItemsStage);
+        });
         //set Stage boundaries to visible bounds of the main screen
         primaryStage.setX(primaryScreenBounds.getMinX());
         primaryStage.setY(primaryScreenBounds.getMinY());
         primaryStage.setWidth(primaryScreenBounds.getWidth());
         primaryStage.setHeight(primaryScreenBounds.getHeight());
+primaryStage.setMaximized(true);
         Image ico = new Image("images/stockIcon.png");
         primaryStage.getIcons().add(ico);
         primaryStage.setTitle("Home");

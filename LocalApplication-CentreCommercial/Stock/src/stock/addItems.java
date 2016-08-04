@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -28,54 +29,63 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- *
- * @author skynete10
- */
+
 public class addItems extends Application {
-    static String staticItem;
-     Stage editStage=new Stage(StageStyle.DECORATED);
+    static String staticItem;// item name using in other classes
+    Stage editStage=new Stage(StageStyle.DECORATED);// create new null stage to use it at parameter
     TableView<Pers> tab1=new TableView<>();
     TableView<Pers> tab2=new TableView<>();
+    //tableview using class person
     TableView<Item> tab3=new TableView<>();
+    //tableview using class items
     private final ObservableList<Pers> data1 =
             FXCollections.observableArrayList();
     private final ObservableList<Pers> data2 =
             FXCollections.observableArrayList();
     private final ObservableList<Item> data3 =
             FXCollections.observableArrayList();
-    Label labels[]=new Label[9];
-    TextField txts[]=new TextField[9];
-    DatePicker datep=new DatePicker();
+    //data to add classes variable and using it in table
+    Label labels[]=new Label[9];//label array
+    TextField txts[]=new TextField[9];//textfield array
+    DatePicker datep=new DatePicker();// callendar
     int flag;
     @Override
     public void start(Stage primaryStage) throws SQLException {
         // set width and height variable
-        selectAllFromTable();
-        selectItemsFromTable();
-        double widthvar=primaryStage.getWidth();
-        double heightvar=primaryStage.getHeight();
-        tab1.setPrefWidth(500);
-        tab2.setPrefWidth(500);
-        tab3.setPrefWidth(500);
+        selectAllFromTable();//select all salesman and supplier
+        selectItemsFromTable();//----select all items and display it in tableview
+        double widthvar=primaryStage.getWidth();//get stage width
+        double heightvar=primaryStage.getHeight();//get stage height
+        //-----set tableview width
+        tab1.setPrefWidth(700);
+        tab2.setPrefWidth(700);
+        tab3.setPrefWidth(700);
+        
         double tab1width=500;
         double tab2width=500;
+        GridPane gridtitle=new GridPane();
+        gridtitle.setStyle("-fx-background-color: #2DA2CF;");
+        Label titleLabel=new Label("Items");
+        gridtitle.add(titleLabel, 1, 5);
+        gridtitle.setAlignment(Pos.CENTER);
+        titleLabel.setId("titles");
         
         //----labels name and define and textfields array
         
         String label_name[]=new String[]{"Item name","Description","Quantity","Price","Barcode","Fond","Expiry","Salesman","Supplier"};
         GridPane labels_grid=new GridPane();
+        labels_grid.setStyle("-fx-grid-lines-visible: true");
         labels_grid.setVgap(20);
         labels_grid.setHgap(10);
         
         Insets in1=new Insets(20, 20, 20, 20);
+        //----distribute labels name for lables and textfield names
         labels_grid.setPadding(in1);
         for (int i=0;i<labels.length;i++) {
             labels[i]=new Label(label_name[i]);
@@ -93,29 +103,63 @@ public class addItems extends Application {
         labels_grid.add(datep, 2, 4);
         labels_grid.add(labels[4], 3, 4);
         labels_grid.add(txts[4], 4, 4);
+        //-----set permission to textfield to use only numbers
+        txts[2]=new TextField(){
+            @Override public void replaceText(int start, int end, String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceText(start, end, text);
+                }
+            }
+            
+            @Override public void replaceSelection(String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceSelection(text);
+                }
+            }
+        };
+        txts[3]=new TextField(){
+            @Override public void replaceText(int start, int end, String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceText(start, end, text);
+                }
+            }
+            
+            @Override public void replaceSelection(String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceSelection(text);
+                }
+            }
+        };
         //----end append label_grid
         Label search=new Label("Search Items");
         TextField search_txt=new TextField();
         Button addIt=new Button("Add Item");
         VBox v1=new VBox();
         Button Clear=new Button("Clear Fields");
+        GridPane btngrid=new GridPane();
+        btngrid.setHgap(10);
+        btngrid.setVgap(10);
+        btngrid.add(addIt, 1, 1);
+        btngrid.add(Clear, 3, 1);
         addIt.setOnAction((Event)->{
-            checkRequired();
-             if(flag==0){   
-            try {
+            checkRequired();//-----check textfield if empty
+            if(flag==0){
+                try {
+                    
+                    insertItems();//----if textfield not empty insert items into tableview and into mysql table
+                } catch (SQLException ex) {
+                    Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                clearFields();//----clear textfields after insert
+            }
             
-                insertItems();
-            } catch (SQLException ex) {
-                Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            }
+        });
+        //----clear button to clear all textfields
+        Clear.setOnAction((Event)->{
             clearFields();
         });
-        Clear.setOnAction((Event)->{
-           clearFields(); 
-        });
-        v1.getChildren().addAll(labels_grid,addIt,Clear,search,search_txt,tab3);
-        //----add event
+        v1.getChildren().addAll(labels_grid,btngrid,search,search_txt,tab3);
+        //----add event to tableview on duble click on row to set name in textfield of supplier and salesman
         tab1.setRowFactory( tv -> {
             TableRow<Pers> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -136,30 +180,67 @@ public class addItems extends Application {
             });
             return row ;
         });
-       
-        txts[7].addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
-            data1.clear();
-            try {
-                selectSalesFromTable(txts[7].getText());
-            } catch (SQLException ex) {
-                Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
+        //----end adding event to tableview on duble click on row to set name in textfield of supplier and salesman
+        txts[7].textProperty().addListener((javafx.beans.Observable observable) -> {
+//filter tableviews
+            if( txts[7].textProperty().get().isEmpty()) {
+                tab1.setItems(data1);
+                return;
             }
+            ObservableList<Pers> tableItems = FXCollections.observableArrayList();
+            ObservableList<TableColumn<Pers, ?>> cols = tab1.getColumns();
+            for (Pers data11 : data1) {
+                for (TableColumn<Pers, ?> col1 : cols) {
+                    TableColumn col = col1;
+                    String cellValue = col.getCellData(data11).toString();
+                    cellValue = cellValue.toLowerCase();
+                    if (cellValue.contains(txts[7].textProperty().get().toLowerCase())) {
+                        tableItems.add(data11);
+                        break;
+                    }
+                }
+            }
+            tab1.setItems(tableItems);
         });
-        txts[8].addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
-            data2.clear();
-            try {
-                selectSuppFromTable(txts[8].getText());
-            } catch (SQLException ex) {
-                Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
+        txts[8].textProperty().addListener((javafx.beans.Observable observable) -> {
+            if(txts[8].textProperty().get().isEmpty()) {
+                tab2.setItems(data2);
+                return;
             }
+            ObservableList<Pers> tableItems = FXCollections.observableArrayList();
+            ObservableList<TableColumn<Pers, ?>> cols = tab2.getColumns();
+            for (Pers data11 : data2) {
+                for (TableColumn<Pers, ?> col1 : cols) {
+                    TableColumn col = col1;
+                    String cellValue = col.getCellData(data11).toString();
+                    cellValue = cellValue.toLowerCase();
+                    if (cellValue.contains(txts[8].textProperty().get().toLowerCase())) {
+                        tableItems.add(data11);
+                        break;
+                    }
+                }
+            }
+            tab2.setItems(tableItems);
         });
-        search_txt.addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
-            data3.clear();
-            try {
-                selectItemsBFromTable(search_txt.getText());
-            } catch (SQLException ex) {
-                Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
+        search_txt.textProperty().addListener((javafx.beans.Observable observable) -> {
+            if(search_txt.textProperty().get().isEmpty()) {
+                tab3.setItems(data3);
+                return;
             }
+            ObservableList<Item> tableItems = FXCollections.observableArrayList();
+            ObservableList<TableColumn<Item, ?>> cols = tab3.getColumns();
+            for (Item data11 : data3) {
+                for (TableColumn<Item, ?> col1 : cols) {
+                    TableColumn col = col1;
+                    String cellValue = col.getCellData(data11).toString();
+                    cellValue = cellValue.toLowerCase();
+                    if (cellValue.contains(search_txt.textProperty().get().toLowerCase())) {
+                        tableItems.add(data11);
+                        break;
+                    }
+                }
+            }
+            tab3.setItems(tableItems);
         });
         //----end adding event
         //----create table column
@@ -201,6 +282,7 @@ public class addItems extends Application {
                 new PropertyValueFactory<>("Qty"));
         //-----ending creating columns
         //----tableviews
+        
         VBox vTable=new VBox();
         v1.setPadding(in1);
         vTable.setPadding(in1);
@@ -215,10 +297,11 @@ public class addItems extends Application {
         vTable.getChildren().addAll(sales,tab1,supp,tab2);
         //---tableviews
         BorderPane root = new BorderPane();
+        root.setTop(gridtitle);
         root.setLeft(v1);
         root.setRight(vTable);
         Scene scene = new Scene(root, 300, 250);
-        String css =this.getClass().getResource("customer.css").toExternalForm();
+        String css =this.getClass().getResource("items.css").toExternalForm();
         scene.getStylesheets().add(css);
         primaryStage.setTitle("Items");
         primaryStage.setScene(scene);
@@ -227,7 +310,7 @@ public class addItems extends Application {
     }
     
     
-  
+    //create class persone
     public static class Pers{
         private final SimpleStringProperty firstName;
         private final SimpleStringProperty lastName;
@@ -260,88 +343,7 @@ public class addItems extends Application {
             company.set(varcompany);
         }
     }
-    void selectSalesFromTable(String S) throws SQLException {
-        
-        Connection dbConnection = null;
-        PreparedStatement preparedStatement = null;
-        
-        String selectSQL = "SELECT * FROM salesman WHERE fname like ? or lname like ?";
-        
-        try {
-            dbConnection = connection.getDBConnection();
-            preparedStatement = dbConnection.prepareStatement(selectSQL);
-            preparedStatement.setString(1, "%"+S+"%");
-            preparedStatement.setString(2, "%"+S+"%");
-            // execute select SQL stetement
-            ResultSet rs = preparedStatement.executeQuery();
-            String result = null;
-            int fond;
-            while (rs.next()) {
-                String fname=rs.getString("fname");
-                String lname=rs.getString("lname");
-                String comp=rs.getString("company");
-                data1.add(new Pers(fname, lname, comp));
-            }
-            
-            
-        } catch (SQLException e) {
-            
-            System.out.println(e.getMessage());
-            
-        } finally {
-            
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            
-            if (dbConnection != null) {
-                dbConnection.close();
-            }
-            
-        }
-        
-    }
-    void selectSuppFromTable(String S) throws SQLException {
-        
-        Connection dbConnection = null;
-        PreparedStatement preparedStatement = null;
-        
-        String selectSQL = "SELECT * FROM supplier WHERE fname like ? or lname like ?";
-        
-        try {
-            dbConnection = connection.getDBConnection();
-            preparedStatement = dbConnection.prepareStatement(selectSQL);
-            preparedStatement.setString(1, "%"+S+"%");
-            preparedStatement.setString(2, "%"+S+"%");
-            // execute select SQL stetement
-            ResultSet rs = preparedStatement.executeQuery();
-            String result = null;
-            int fond;
-            while (rs.next()) {
-                String fname=rs.getString("fname");
-                String lname=rs.getString("lname");
-                String comp=rs.getString("company");
-                data2.add(new Pers(fname, lname, comp));
-            }
-            
-            
-        } catch (SQLException e) {
-            
-            System.out.println(e.getMessage());
-            
-        } finally {
-            
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            
-            if (dbConnection != null) {
-                dbConnection.close();
-            }
-            
-        }
-        
-    }
+    //select all salesman and suppliers from tables
     void selectAllFromTable() throws SQLException {
         
         Connection dbConnection = null;
@@ -388,6 +390,7 @@ public class addItems extends Application {
         }
         
     }
+    //create class items
     public static class Item {
         private final SimpleStringProperty ItemName;
         private final SimpleDoubleProperty Price;
@@ -477,46 +480,11 @@ public class addItems extends Application {
         }
         
     }
-    void selectItemsBFromTable(String S) throws SQLException {
-        
-        Connection dbConnection = null;
-        PreparedStatement preparedStatement = null;
-        
-        String selectSQL = "SELECT * FROM items WHERE barcode like ? or name like ?";
-        
-        try {
-            dbConnection = connection.getDBConnection();
-            preparedStatement = dbConnection.prepareStatement(selectSQL);
-            preparedStatement.setString(1, "%"+S+"%");
-            preparedStatement.setString(2, "%"+S+"%");
-            // execute select SQL stetement
-            ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()){
-                String itemName=rs.getString("name");
-                double price=rs.getDouble("price");
-                int qty=rs.getInt("qty");
-                data3.add(new Item(itemName, price, qty, "", ""));
-            }
-        } catch (SQLException e) {
-            
-            System.out.println(e.getMessage());
-            
-        } finally {
-            
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            
-            if (dbConnection != null) {
-                dbConnection.close();
-            }
-            
-        }
-        
-    }
+    
     public void clearFields(){
         for (int i=0;i<labels.length;i++) {
             txts[i].clear();
+            txts[i].setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
         }
     }
     public void insertItems() throws SQLException{
@@ -577,5 +545,8 @@ public class addItems extends Application {
                 flag=0;
             }
         }
+    }
+    public static void main(String[] args) {
+        launch(args);
     }
 }

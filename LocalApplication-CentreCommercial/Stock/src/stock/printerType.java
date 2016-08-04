@@ -14,10 +14,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- *
- * @author skynete10
- */
+
 public class printerType extends Application {
     static double widths;
     static double heights;

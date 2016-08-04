@@ -39,11 +39,11 @@ import javafx.css.PseudoClass;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
 public class customer extends Application {
-    ObservableList<company.Person> data1 =company.data1;
-    ObservableList<family.Person> data2 =family.data2;
-    Connection dbConnection = null;
-    Stage compStage=new Stage(StageStyle.DECORATED);
-    Stage famStage=new Stage(StageStyle.DECORATED);
+    ObservableList<company.Person> data1 =company.data1;//get data from class person exist in company form
+    ObservableList<family.Person> data2 =family.data2;//get data from class person exist in family form
+    Connection dbConnection = null; //create object from class connection
+    Stage compStage=new Stage(StageStyle.DECORATED); //create null object of stage to company 
+    Stage famStage=new Stage(StageStyle.DECORATED);// //create null object of stage to family
     GridPane grid1=new GridPane();
     String imagepath="";
     PreparedStatement preparedStatement = null;
@@ -63,7 +63,8 @@ public class customer extends Application {
         TextField t10=new TextField();
         TextField t11=new TextField();
     final HBox hb = new HBox();
-    
+    final VBox container1=new VBox();
+   
     public static void main(String[] args) {
         launch(args);
     }
@@ -74,8 +75,8 @@ public class customer extends Application {
        
         
             
-        
-        HBox des=new HBox();
+       
+        VBox des=new VBox();
         GridPane dess=new GridPane();
         dess.setHgap(10);
         dess.setVgap(10);
@@ -103,7 +104,7 @@ public class customer extends Application {
         grid1.setVgap(10);grid1.setHgap(10);
         Label l1=new Label("Personnal Information");
         l1.setId("l1");
-        l1.setPrefSize(1000, 30);
+       
         l1.setStyle("-fx-background-color: gray;-fx-font-size: 14px;");
         Label l2=new Label("First Name");
         Label l3=new Label("Company");
@@ -125,7 +126,7 @@ public class customer extends Application {
          
         ComboBox<String> c1=new ComboBox<>();
         
-        String[] locales = Locale.getISOCountries();
+        String[] locales = Locale.getISOCountries(); // get all country builld in java
         
         for (String countryCode : locales) {
             
@@ -135,7 +136,7 @@ public class customer extends Application {
             c1.getSelectionModel().selectFirst();
             c1.setEditable(true);
         }
-        ComboBox<String> c2 = new ComboBox<>(FXCollections.observableArrayList("Simgle","Company","Family"));
+        ComboBox<String> c2 = new ComboBox<>(FXCollections.observableArrayList("Single","Company","Family"));
         
          
         c2.getSelectionModel().selectFirst();
@@ -157,7 +158,7 @@ public class customer extends Application {
             
         
          
-          if(checkrequiredField()==true){
+          if(checkrequiredField()==true){ //check if any textfiled is empty
               
           }   
           else{
@@ -173,6 +174,7 @@ public class customer extends Application {
          String sp=t11.getText();
          String country=c1.getValue();
          String type=c2.getValue();
+         //fill in the table view all data entred 
              data.add(new Person(fname, company, stt1,city,zip,fax,lname,phone,stt2,sp,country,type));
           String insertSQL = "INSERT INTO `customer`(`fname`, `lname`, `company`, "
                   + "`phone`, `str1`, `str2`, `city`, `state`, `zip`, `country`, `fax`, `type`, `picture`)"
@@ -181,7 +183,8 @@ public class customer extends Application {
                   + " VALUES (?,?,?,?)";
            String insertSQL2 ="INSERT INTO `family`(`customerPhone`,`fname`, `lastName`, `phone`)"
                   + " VALUES (?,?,?,?)";
-        try {
+      //insert all data in database
+           try {
             dbConnection = connection.getDBConnection();
             preparedStatement = dbConnection.prepareStatement(insertSQL);
             preparedStatement1 = dbConnection.prepareStatement(insertSQL1);
@@ -222,8 +225,8 @@ public class customer extends Application {
                 int rs2 = preparedStatement2.executeUpdate();
             }
             }
-            clearFields();
-            resetrequiredField();
+            clearFields();//clear field after save 
+            resetrequiredField(); //clear red border
             
         } catch (SQLException e) {
             
@@ -253,14 +256,18 @@ public class customer extends Application {
         grid1.add(t5, 2, 4);grid1.add(t11, 4, 4);
         grid1.add(t6, 2, 5);grid1.add(c1, 4, 5);
         grid1.add(t7, 2, 6);grid1.add(c2, 4, 6);
-        grid1.add(save, 5, 1);grid1.add(clear, 5, 2);
-        v1.getChildren().add(l1);
-        v1.getChildren().add(grid1);
-        des.getChildren().addAll(v1,dess,imgview1,addimage);
-        
+        grid1.add(save, 1, 0);grid1.add(clear, 2, 0);
+       
+        des.getChildren().addAll(imgview1,save,clear,addimage);
+        container1.getChildren().add(l1);
+        GridPane grd2=new GridPane();
+        grd2.add(grid1, 1, 1);
+        grd2.add(imgview1, 2, 1);
+        container1.getChildren().add(grd2);
         Scene scene = new Scene(new Group());
         stage.setTitle("Customer");
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+         l1.setPrefSize(primaryScreenBounds.getWidth(), 30);
         double widthVar=(primaryScreenBounds.getWidth())/12;
         table.setPrefWidth(primaryScreenBounds.getWidth());
         //set Stage boundaries to visible bounds of the main screen
@@ -461,20 +468,22 @@ public class customer extends Application {
                     }
                 }
         );
-        table.setItems(data);
-        table.getColumns().addAll(firstNameCol, st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11);
+        table.setItems(data);//add data to table 
+        table.getColumns().addAll(firstNameCol, st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11);//add colums to table view
         
         
         
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
-        
-        
+        GridPane grd11=new GridPane();
+        grd11.add(v1, 1, 1);
+        grd11.add(imgview1, 2, 1);
         vbox.setPadding(new Insets(10, 0, 0, 10));
         vbox.getChildren().addAll(label, table, hb);
         BorderPane root = new BorderPane();
-        root.setLeft(vbox);
-        root.setTop(des);
+        root.setBottom(vbox);
+       root.setTop(grd2);
+        
         
         scene=new Scene(root);
         String css =this.getClass().getResource("customer.css").toExternalForm();
@@ -735,7 +744,7 @@ public class customer extends Application {
         }
         
         @Override
-        public void updateItem(String item, boolean empty) {
+        public void updateItem(String item, boolean empty) { //exit to cell
             super.updateItem(item, empty);
             
             if (empty) {
@@ -758,19 +767,15 @@ public class customer extends Application {
         private void createTextField() {
             textField = new TextField(getString());
             textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()* 2);
-            textField.focusedProperty().addListener(new ChangeListener<Boolean>(){
-                @Override
-                public void changed(ObservableValue<? extends Boolean> arg0,
-                        Boolean arg1, Boolean arg2) {
-                    if (!arg2) {
-                        commitEdit(textField.getText());
-                    }
+            textField.focusedProperty().addListener((ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) -> {
+                if (!arg2) {
+                    commitEdit(textField.getText());
                 }
             });
         }
         
         private String getString() {
-            return getItem() == null ? "" : getItem().toString();
+            return getItem() == null ? "" : getItem().toString(); //predefine function from cell
         }
         
     }

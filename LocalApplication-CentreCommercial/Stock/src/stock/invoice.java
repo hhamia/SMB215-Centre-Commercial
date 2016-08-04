@@ -16,10 +16,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- *
- * @author skynete10
- */
 public class invoice extends Application {
     
     @Override

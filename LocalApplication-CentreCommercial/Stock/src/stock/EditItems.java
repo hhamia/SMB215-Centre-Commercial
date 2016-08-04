@@ -17,11 +17,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-
-/**
- *
- * @author skynete10
- */
 public class EditItems extends Application {
     Label labels[]=new Label[9];
     TextField txts[]=new TextField[9];

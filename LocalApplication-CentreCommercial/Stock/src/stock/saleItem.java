@@ -27,6 +27,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -43,12 +44,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 
-
+//declared class sales item/
+//class public include all functions and other classes
 public class saleItem extends Application {
-    double TotalPrice1;
-    int itemqty1;
+    double TotalPrice1;// Sum of all prices
+    int itemqty1;//quantity selected from database
     TextField barItem=new TextField();
     TextField text1;
     TextField text2;
@@ -56,7 +59,7 @@ public class saleItem extends Application {
     TextField text4;
     private final TableView<items> table = new TableView<>();
     private final ObservableList<items> data =
-            FXCollections.observableArrayList();
+            FXCollections.observableArrayList(); //data to get item from class item 
     Pane panel1=new Pane();
     Label Total=new Label("Total (L.L)");
     Label TotalPrice=new Label("0.0");
@@ -67,7 +70,7 @@ public class saleItem extends Application {
         Connection dbConnection = null;
         dbConnection = connection.getDBConnection();
         
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();// width and height of screen
         Total.setId("total");
         VBox vbox1=new VBox();
         HBox hbox1=new HBox();
@@ -79,13 +82,14 @@ public class saleItem extends Application {
         TotalPrice.setId("total");
         hbox1.getChildren().add(Total);
         hbox1.getChildren().add(TotalPrice);
-        
+        Stage printerStage1=new Stage(StageStyle.DECORATED);
         Label l1=new Label("Extra sales");
         Label l2=new Label("Extra item");
         Label l3=new Label("Extra price");
         Label l4=new Label("Extra qty");
         Label l5=new Label("Extra Description");
         text1=new TextField();
+        // enable textfield to accept only numbers
         text2=new TextField(){
             @Override public void replaceText(int start, int end, String text) {
                 if (text.matches("[0-9]*")) {
@@ -120,6 +124,10 @@ public class saleItem extends Application {
         Button btn2=new Button("Add extra item");
         btn2.setPrefWidth(200);
         Button btn3=new Button("Generate Invoice");
+        btn3.setOnAction((event)->{
+            printerType p1=new printerType();
+            p1.start(printerStage1);
+        });
         btn3.setPrefWidth(200);
         GridPane grid1=new GridPane();
         grid1.setVgap(10);
@@ -135,6 +143,7 @@ public class saleItem extends Application {
         grid1.add(text4, 8, 1);
         grid1.add(btn2, 4, 2);
         grid1.add(btn3, 6, 2);
+        // add extra items to tableview and data
         btn2.setOnAction((event) -> {
             if(checkrequiredField()==false){
                 String extraname=text1.getText();
@@ -145,7 +154,7 @@ public class saleItem extends Application {
                 TotalPrice1=TotalPrice1+(extraprice*extraqty);
                    TotalPrice.setText(String.valueOf(TotalPrice1));
                 try {
-                    insertIntoextra(extraname, extraqty, extraprice, extradesc, getDate());
+                    insertIntoextra(extraname, extraqty, extraprice, extradesc, getDate());//instert data to extra table
                 } catch (SQLException ex) {
                     Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -158,7 +167,7 @@ public class saleItem extends Application {
         
         table.setPrefWidth(primaryScreenBounds.getWidth());
         table.setPrefHeight(primaryScreenBounds.getHeight()/1.5);
-        table.setRowFactory((TableView<items> tableView) -> {
+        table.setRowFactory((TableView<items> tableView) -> {//right click remove row
             final TableRow<items> row = new TableRow<>();
             final ContextMenu contextMenu = new ContextMenu();
             final MenuItem removeMenuItem = new MenuItem("Remove item");
@@ -167,7 +176,7 @@ public class saleItem extends Application {
                 table.getItems().remove(row.getItem());
                 if("Extra items".equals(item.getReste())){
                 try {
-                    deletFromextra(item.getItemName());
+                    deletFromextra(item.getItemName());//delete data from extra table 
                     TotalPrice1=TotalPrice1-(item.getPrice()*item.getQty());
                     TotalPrice.setText(String.valueOf(TotalPrice1));
                 } catch (SQLException ex) {
@@ -176,9 +185,10 @@ public class saleItem extends Application {
                 }
                 else{
                 try {
-                    deletFromtrans(item.getItemName(), itemqty1+1);
+                    deletFromtrans(item.getItemName(), itemqty1+1);//delete data from transaction table
                     TotalPrice1=TotalPrice1-item.getPrice();
                     TotalPrice.setText(String.valueOf(TotalPrice1));
+                   updatetotable(item.getItemName());
                 } catch (SQLException ex) {
                     Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -194,6 +204,7 @@ public class saleItem extends Application {
             );
             return row ;
         });  
+        //set tablecolumn names to accept data values
         TableColumn Itemnamecol=new TableColumn("Item Name");
         Itemnamecol.setPrefWidth(300);
         Itemnamecol.setCellValueFactory(
@@ -221,7 +232,7 @@ public class saleItem extends Application {
         table.getColumns().addAll(Itemnamecol,descripCol,PriceCol,QtyCol,QtyResCol);
         BorderPane root = new BorderPane();
         
-        
+        //baritem textfield action slecte data by barr code or item name
         barItem.setOnAction((event) -> {
             
             try {
@@ -259,7 +270,7 @@ public class saleItem extends Application {
         
         
     }
-    
+    // class items, requierd all variable for items needed to append data and tableview
     public static class items {
         private final SimpleStringProperty ItemName;
         private final SimpleDoubleProperty Price;
@@ -442,14 +453,8 @@ Date date = new Date();
     }
     
     
-    public void keyPressed (KeyEvent ke)
-    {
-        int code=ke.getKeyCode();
-        if(code==KeyEvent.VK_ENTER ){
-            items selectedItems = (items) table.getSelectionModel().getSelectedItems();
-            data.remove(selectedItems);
-        }
-    }
+  
+  
     void insertIntoTransaction(String itemname,int qty,double price,String date,String time) throws SQLException{
      Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
@@ -524,6 +529,7 @@ Date date = new Date();
         }
         
     }
+    //modify to table item (qty)
     void updatetotable(String S) throws SQLException {
         
         Connection dbConnection = null;
@@ -559,6 +565,7 @@ Date date = new Date();
         }
         
     }
+    //delete from transaction table  if i make remove item
   void deletFromtrans(String S,int qtyValue) throws SQLException {
         
         Connection dbConnection = null;
@@ -596,6 +603,8 @@ Date date = new Date();
         }
         
     }  
+  
+   //delete from extra  table  if i make remove item
   void deletFromextra(String S) throws SQLException {
         
         Connection dbConnection = null;
@@ -630,6 +639,7 @@ Date date = new Date();
         }
         
     }
+  
    void checkItemQty(String S) throws SQLException {
         
         Connection dbConnection = null;

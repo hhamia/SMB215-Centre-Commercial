@@ -278,9 +278,13 @@ public class family extends Application {
         private void createTextField() {
             textField = new TextField(getString());
             textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()* 2);
-            textField.focusedProperty().addListener((ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) -> {
-                if (!arg2) {
-                    commitEdit(textField.getText());
+            textField.focusedProperty().addListener(new ChangeListener<Boolean>(){
+                @Override
+                public void changed(ObservableValue<? extends Boolean> arg0,
+                        Boolean arg1, Boolean arg2) {
+                    if (!arg2) {
+                        commitEdit(textField.getText());
+                    }
                 }
             });
         }

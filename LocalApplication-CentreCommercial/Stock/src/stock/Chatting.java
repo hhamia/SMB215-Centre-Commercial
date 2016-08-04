@@ -41,10 +41,6 @@ import javafx.stage.WindowEvent;
 import static stock.Client.clientSocket;
 
 
-/**
- *
- * @author skynete10
- */
 public class Chatting extends Application {
      
      TableView<Pers> ChatTab=new TableView<>();

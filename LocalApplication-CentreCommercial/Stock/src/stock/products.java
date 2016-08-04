@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -28,17 +29,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- *
- * @author skynete10
- */
+
 public class products extends Application {
     TableView<Item> tab1=new TableView<>();
     static String staticItem;
@@ -48,13 +46,18 @@ public class products extends Application {
             FXCollections.observableArrayList();
     VBox box=new VBox();
     
+    GridPane gridtitle=new GridPane();
     Label search=new Label("Search");
     TextField sear_txt=new TextField();
     @Override
     public void start(Stage primaryStage) throws SQLException {
         final CategoryAxis xAxis = new CategoryAxis();
         final NumberAxis yAxis = new NumberAxis();
-       
+        Label titleLabel=new Label("Stock Card");
+        gridtitle.add(titleLabel, 1, 5);
+        gridtitle.setAlignment(Pos.CENTER);
+       titleLabel.setId("titles");
+       titleLabel.setAlignment(Pos.CENTER);
          final LineChart<String,Number> lineChart = 
                 new LineChart<>(xAxis,yAxis);
                 
@@ -116,6 +119,7 @@ public class products extends Application {
         box.getChildren().addAll(sear_txt,tab1);
         
         BorderPane root = new BorderPane();
+        root.setTop(gridtitle);
         root.setLeft(box);
         root.setRight(lineChart);
         Scene scene = new Scene(root, 300, 250);
@@ -155,13 +159,33 @@ public class products extends Application {
             });
             return row ;
         });
-        sear_txt.addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
+        /*sear_txt.addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
             data1.clear();
             try {
                 selectItemsBFromTable(sear_txt.getText());
             } catch (SQLException ex) {
                 Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
             }
+        });*/
+        sear_txt.textProperty().addListener((javafx.beans.Observable observable) -> {
+            if(sear_txt.textProperty().get().isEmpty()) {
+                tab1.setItems(data1);
+                return;
+            }
+            ObservableList<Item> tableItems = FXCollections.observableArrayList();
+            ObservableList<TableColumn<Item, ?>> cols = tab1.getColumns();
+            for (Item data11 : data1) {
+                for (TableColumn<Item, ?> col1 : cols) {
+                    TableColumn col = col1;
+                    String cellValue = col.getCellData(data11).toString();
+                    cellValue = cellValue.toLowerCase();
+                    if (cellValue.contains(sear_txt.textProperty().get().toLowerCase())) {
+                        tableItems.add(data11);
+                        break;
+                    }
+                }
+            }
+            tab1.setItems(tableItems);
         });
         primaryStage.setX(primaryScreenBounds.getMinX());
         primaryStage.setY(primaryScreenBounds.getMinY());

@@ -16,10 +16,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-/**
- *
- * @author skynete10
- */
 public class chatRoom extends Application {
      ListView<Chat> chat_list=new ListView<>();
      TextArea chat_text=new TextArea();

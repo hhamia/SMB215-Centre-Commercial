@@ -7,10 +7,7 @@ package stock;
 
 import java.awt.Toolkit;
 
-/**
- *
- * @author skynete10
- */
+
 public class functions {
     public static void playbeep(){
         Toolkit.getDefaultToolkit().beep();
