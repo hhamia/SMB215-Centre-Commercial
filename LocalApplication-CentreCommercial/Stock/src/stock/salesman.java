@@ -33,13 +33,21 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javafx.application.Application.launch;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.css.PseudoClass;
 import javafx.stage.FileChooser;
 import javafx.stage.StageStyle;
 public class salesman extends Application {
+    TextField sear_txt=new TextField();
+    int idcount;
+    static final ObservableList<Person> data0 =
+            FXCollections.observableArrayList();
     ObservableList<company.Person> data1 =company.data1;
     ObservableList<family.Person> data2 =family.data2;
     Connection dbConnection = null;
@@ -75,19 +83,21 @@ public class salesman extends Application {
        
         
             
-        
+        selectCustomerFrom();
         HBox des=new HBox();
         GridPane dess=new GridPane();
         dess.setHgap(10);
         dess.setVgap(10);
         Button save=new Button("Save");
         Button clear=new Button("Clear Fields");
-        
-        Image img1 = new Image("images/stockIcon.png");
+        save.setPrefWidth(200);
+        clear.setPrefWidth(200);
+        Image img1 = new Image("images/contact.png");
         ImageView imgview1=new ImageView(img1);
-        imgview1.setFitHeight(150);
-        imgview1.setFitWidth(150);
+        imgview1.setFitHeight(300);
+        imgview1.setFitWidth(300);
         Button addimage=new Button("add image");
+        addimage.setPrefWidth(300);
         addimage.setOnAction((event) -> {
             FileChooser chooser = new FileChooser();
     chooser.setTitle("Open File");
@@ -174,7 +184,8 @@ public class salesman extends Application {
          String sp=t11.getText();
          String country=c1.getValue();
          String type=c2.getValue();
-             data.add(new Person(fname, company, stt1,city,zip,fax,lname,phone,stt2,sp,country,type));
+         idcount=idcount+1;
+             data.add(new Person(String.valueOf(idcount),fname, company, stt1,city,zip,fax,lname,phone,stt2,sp,country,type));
           String insertSQL = "INSERT INTO `salesman`(`fname`, `lname`, `company`, "
                   + "`phone`, `str1`, `str2`, `city`, `state`, `zip`, `country`, `fax`, `type`, `picture`)"
                   + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -254,10 +265,18 @@ public class salesman extends Application {
         grid1.add(t5, 2, 4);grid1.add(t11, 4, 4);
         grid1.add(t6, 2, 5);grid1.add(c1, 4, 5);
         grid1.add(t7, 2, 6);grid1.add(c2, 4, 6);
-        grid1.add(save, 5, 1);grid1.add(clear, 5, 2);
+        grid1.add(save, 2, 7);grid1.add(clear, 4, 7);
         v1.getChildren().add(l1);
         v1.getChildren().add(grid1);
-        des.getChildren().addAll(v1,dess,imgview1,addimage);
+        VBox imgBtn=new VBox();
+        imgBtn.setStyle("-fx-padding: 5;" + 
+                      "-fx-border-style: solid inside;" + 
+                      "-fx-border-width: 2;" +
+                      "-fx-border-insets: 5;" + 
+                      "-fx-border-radius: 5;" + 
+                      "-fx-border-color: gray;");
+        imgBtn.getChildren().addAll(imgview1,addimage);
+        des.getChildren().addAll(v1,dess,imgBtn);
         
         Scene scene = new Scene(new Group());
         stage.setTitle("Salesman");
@@ -280,11 +299,16 @@ public class salesman extends Application {
                         return new EditingCell();
                     }
                 };
+         TableColumn idcol = new TableColumn("ID");
+        idcol.setMinWidth(10);
+        idcol.setCellValueFactory(
+                new PropertyValueFactory<>("ID"));
+       // idcol.setCellFactory(cellFactory);
         
         TableColumn firstNameCol = new TableColumn("First Name");
         firstNameCol.setMinWidth(widthVar);
         firstNameCol.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("firstName"));
+                new PropertyValueFactory<>("firstName"));
         firstNameCol.setCellFactory(cellFactory);
         firstNameCol.setOnEditCommit(
                 new EventHandler<CellEditEvent<Person, String>>() {
@@ -300,7 +324,7 @@ public class salesman extends Application {
         TableColumn st1 = new TableColumn("Last Name");
         st1.setMinWidth(widthVar);
         st1.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("lastName"));
+                new PropertyValueFactory<>("lastName"));
         st1.setCellFactory(cellFactory);
         st1.setOnEditCommit(
                 new EventHandler<CellEditEvent<Person, String>>() {
@@ -315,7 +339,7 @@ public class salesman extends Application {
         TableColumn st2 = new TableColumn("Company");
         st2.setMinWidth(widthVar);
         st2.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("company"));
+                new PropertyValueFactory<>("company"));
         st2.setCellFactory(cellFactory);
         st2.setOnEditCommit(
                 new EventHandler<CellEditEvent<Person, String>>() {
@@ -463,8 +487,27 @@ public class salesman extends Application {
                 }
         );
         table.setItems(data);
-        table.getColumns().addAll(firstNameCol, st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11);
-        
+        table.getColumns().addAll(idcol,firstNameCol, st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11);
+         sear_txt.textProperty().addListener((javafx.beans.Observable observable) -> {
+            if(sear_txt.textProperty().get().isEmpty()) {
+                table.setItems(data);
+                return;
+            }
+            ObservableList<Person> tableItems = FXCollections.observableArrayList();
+            ObservableList<TableColumn<Person, ?>> cols = table.getColumns();
+            for (Person data11 : data) {
+                for (TableColumn<Person, ?> col1 : cols) {
+                    TableColumn col = col1;
+                    String cellValue = col.getCellData(data11).toString();
+                    cellValue = cellValue.toLowerCase();
+                    if (cellValue.contains(sear_txt.textProperty().get().toLowerCase())) {
+                        tableItems.add(data11);
+                        break;
+                    }
+                }
+            }
+            table.setItems(tableItems);
+        });
         
         
         final VBox vbox = new VBox();
@@ -472,17 +515,18 @@ public class salesman extends Application {
         
         
         vbox.setPadding(new Insets(10, 0, 0, 10));
-        vbox.getChildren().addAll(label, table, hb);
-        BorderPane root = new BorderPane();
-        root.setLeft(vbox);
-        root.setTop(des);
+        vbox.getChildren().addAll(label, sear_txt,table, hb);
+        BorderPane root1 = new BorderPane();
+        root1.setLeft(vbox);
+        root1.setTop(des);
         
-        scene=new Scene(root);
-        String css =this.getClass().getResource("customer.css").toExternalForm();
+        scene=new Scene(root1);
+        String css =this.getClass().getResource("salesman.css").toExternalForm();
         scene.getStylesheets().add(css);
         Image ico = new Image("images/customer-service.png");
         stage.getIcons().add(ico);
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
         
         
@@ -584,7 +628,7 @@ public class salesman extends Application {
     }
 
     public static class Person {
-        
+        private final SimpleStringProperty ID;
         private final SimpleStringProperty firstName;
         private final SimpleStringProperty lastName;
         private final SimpleStringProperty company;
@@ -598,9 +642,10 @@ public class salesman extends Application {
         private final SimpleStringProperty country;
         private final SimpleStringProperty type;
         
-        private Person(String fName, String lName, String varcompany,String varstadd1,String varcity
+        private Person(String IDvar,String fName, String lName, String varcompany,String varstadd1,String varcity
                 ,String varzip,String varfax,String varphone,String varstadd2,String varstate,String varcountry,String vartype
         ) {
+            this.ID = new SimpleStringProperty(IDvar);
             this.firstName = new SimpleStringProperty(fName);
             this.lastName = new SimpleStringProperty(lName);
             this.company = new SimpleStringProperty(varcompany);
@@ -614,8 +659,15 @@ public class salesman extends Application {
             this.country = new SimpleStringProperty(varcountry);
             this.type = new SimpleStringProperty(vartype);
             
+            
+        }
+        public String getID() {
+            return ID.get();
         }
         
+        public void setID(String IDvar) {
+            ID.set(IDvar);
+        }
         public String getFirstName() {
             return firstName.get();
         }
@@ -746,6 +798,7 @@ public class salesman extends Application {
                 if (isEditing()) {
                     if (textField != null) {
                         textField.setText(getString());
+                       
                     }
                     setText(null);
                     setGraphic(textField);
@@ -765,13 +818,99 @@ public class salesman extends Application {
                         Boolean arg1, Boolean arg2) {
                     if (!arg2) {
                         commitEdit(textField.getText());
+                        Person p = table.getSelectionModel().getSelectedItem();
+                         Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "UPDATE `salesman` SET `fname`=?,`lname`=?,`company`=?,`phone`=?,`str1`=?,`str2`=?,`city`=?,"
+                + "`state`=?,`zip`=?,`country`=?,`fax`=?,`type`=? WHERE idsalesman=?";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            
+            preparedStatement.setString(1,p.getFirstName());
+            preparedStatement.setString(2, p.getLastName());
+            preparedStatement.setString(3, p.getCompany());
+            preparedStatement.setString(4, p.getPhone());
+            preparedStatement.setString(5, p.getStadd1());
+            preparedStatement.setString(6, p.getStadd2());
+            preparedStatement.setString(7, p.getCity());
+            preparedStatement.setString(8, p.getState());
+            preparedStatement.setString(9, p.getZip());
+            preparedStatement.setString(10, p.getCountry());
+            preparedStatement.setString(11, p.getFax());
+            preparedStatement.setString(12, p.getType());
+            preparedStatement.setInt(13,Integer.parseInt(p.getID()));
+            // execute select SQL stetement
+            int rs = preparedStatement.executeUpdate();
+            
+            
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            if (dbConnection != null) {
+                try {
+                    dbConnection.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+        }
                     }
                 }
+
+                
             });
         }
         
         private String getString() {
             return getItem() == null ? "" : getItem().toString();
+        }
+        
+    }
+    void selectCustomerFrom(){
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "SELECT * FROM salesman";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+           
+            ResultSet rs = preparedStatement.executeQuery();
+            
+            while (rs.next()) {
+              data.add(new Person(String.valueOf(rs.getInt("idsalesman")),rs.getString("fname"), rs.getString("lname"), 
+                      rs.getString("company"), rs.getString("str1"), 
+                      rs.getString("city"), rs.getString("zip"), rs.getString("fax"), rs.getString("phone"),
+                      rs.getString("str2"), rs.getString("state"), rs.getString("country"), rs.getString("type")));
+            }
+        }
+            
+            
+        catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+           
+        } finally {
+            
+          
+            
         }
         
     }
