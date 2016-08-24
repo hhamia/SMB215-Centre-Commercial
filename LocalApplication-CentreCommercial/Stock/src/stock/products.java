@@ -10,11 +10,13 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -22,7 +24,9 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -42,7 +46,8 @@ public class products extends Application {
     static String staticItem;
     double tab1width=500;
     Stage editStage=new Stage(StageStyle.DECORATED);
-    private final ObservableList<Item> data1 =
+    Stage histStage=new Stage(StageStyle.DECORATED);
+    static final ObservableList<Item> data1 =
             FXCollections.observableArrayList();
     VBox box=new VBox();
     
@@ -137,28 +142,55 @@ public class products extends Application {
         st3.setPrefWidth(tab1width/3);
         st3.setCellValueFactory(
                 new PropertyValueFactory<>("Qty"));
+         TableColumn st4 = new TableColumn("Barcode");
+        st4.setPrefWidth(tab1width/3);
+        st4.setCellValueFactory(
+                new PropertyValueFactory<>("description"));
         tab1.setItems(data1);
-        tab1.getColumns().addAll(st1,st2,st3);
+        tab1.getColumns().addAll(st1,st2,st3,st4);
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         box.setPrefWidth(primaryScreenBounds.getWidth()/2);
         box.setPrefHeight(primaryScreenBounds.getHeight());
         tab1.setPrefHeight(primaryScreenBounds.getHeight());
-        tab1.setRowFactory( tv -> {
-            TableRow<Item> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    Item I = tab1.getSelectionModel().getSelectedItem();
-                    staticItem=(I.getItemName());
+        
+        tab1.setRowFactory((TableView<Item> tableView) -> {
+            final TableRow<Item> row = new TableRow<>();
+            final ContextMenu contextMenu = new ContextMenu();
+            final MenuItem editItem = new MenuItem("Edit item");
+             final MenuItem ItemHistory = new MenuItem("View Item History");
+            editItem.setOnAction((ActionEvent event) -> {
+            Item item = tab1.getSelectionModel().getSelectedItem();         
+                    staticItem=(item.getItemName());
                     EditItems editN=new EditItems();
                     try {
                         editN.start(editStage);
                     } catch (SQLException ex) {
                         Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
+                
+         
             });
+             ItemHistory.setOnAction((ActionEvent event) -> {
+            Item item = tab1.getSelectionModel().getSelectedItem();         
+                    staticItem=(item.getItemName());
+                    transactions transN=new transactions();
+                    try {
+                        transN.start(histStage);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(addItems.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                
+         
+            });
+            contextMenu.getItems().addAll(editItem,ItemHistory);
+            // Set context menu on row, but use a binding to make it only show for non-empty rows:
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu)null)
+                            .otherwise(contextMenu)
+            );
             return row ;
-        });
+        });  
         /*sear_txt.addEventFilter(KeyEvent.KEY_TYPED, (KeyEvent event) -> {
             data1.clear();
             try {
@@ -211,7 +243,7 @@ primaryStage.setMaximized(true);
         private final SimpleIntegerProperty Qty;
         private final SimpleStringProperty Description;
         private final SimpleStringProperty Reste;
-        private Item(String Itemnamevar,double Pricevar,int Qtyvar,String Desc,String RestVar){
+        Item(String Itemnamevar,double Pricevar,int Qtyvar,String Desc,String RestVar){
             this.ItemName = new SimpleStringProperty(Itemnamevar);
             this.Price = new SimpleDoubleProperty(Pricevar);
             this.Qty = new SimpleIntegerProperty(Qtyvar);
@@ -254,7 +286,7 @@ primaryStage.setMaximized(true);
             Reste.set(ResV);
         }
     }
-     void selectItemsFromTable() throws SQLException {
+     static void selectItemsFromTable() throws SQLException {
         
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
@@ -272,7 +304,8 @@ primaryStage.setMaximized(true);
                 String itemName=rs.getString("name");
                 double price=rs.getDouble("price");
                 int qty=rs.getInt("qty");
-                data1.add(new Item(itemName, price, qty, "", ""));
+                String barcode=rs.getString("barcode");
+                data1.add(new Item(itemName, price, qty, barcode, ""));
             }
             
             
