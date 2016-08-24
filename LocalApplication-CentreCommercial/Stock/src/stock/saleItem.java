@@ -4,14 +4,17 @@
 * and open the template in the editor.
 */
 package stock;
-import java.awt.event.KeyEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -27,7 +30,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -45,11 +47,17 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
+import report.Report;
 
 
 //declared class sales item/
 //class public include all functions and other classes
 public class saleItem extends Application {
+    public static int invoicenumber;
     double TotalPrice1;// Sum of all prices
     int itemqty1;//quantity selected from database
     TextField barItem=new TextField();
@@ -58,11 +66,12 @@ public class saleItem extends Application {
     TextField text3;
     TextField text4;
     private final TableView<items> table = new TableView<>();
-    private final ObservableList<items> data =
+     public  static ObservableList<items> data =
             FXCollections.observableArrayList(); //data to get item from class item 
     Pane panel1=new Pane();
     Label Total=new Label("Total (L.L)");
     Label TotalPrice=new Label("0.0");
+    Label invNum=new Label();
      Label curr=new Label("L.L");
     int itemqty;
     @Override
@@ -82,12 +91,18 @@ public class saleItem extends Application {
         TotalPrice.setId("total");
         hbox1.getChildren().add(Total);
         hbox1.getChildren().add(TotalPrice);
+        hbox1.getChildren().add(invNum);
         Stage printerStage1=new Stage(StageStyle.DECORATED);
         Label l1=new Label("Extra sales");
         Label l2=new Label("Extra item");
         Label l3=new Label("Extra price");
         Label l4=new Label("Extra qty");
         Label l5=new Label("Extra Description");
+        try {
+            invNum.setText(getInvNum());
+        } catch (SQLException ex) {
+            Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
         text1=new TextField();
         // enable textfield to accept only numbers
         text2=new TextField(){
@@ -125,8 +140,27 @@ public class saleItem extends Application {
         btn2.setPrefWidth(200);
         Button btn3=new Button("Generate Invoice");
         btn3.setOnAction((event)->{
-            printerType p1=new printerType();
-            p1.start(printerStage1);
+            invoicenumber=Integer.parseInt(invNum.getText());
+           Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = stock.connection.getDBConnection();
+            statement = connection.createStatement();
+            HashMap parameterMap = new HashMap();
+            parameterMap.put("rtitle", "Report Title Here");//sending the report title as a parameter.
+            Report rpt = new Report(parameterMap, connection);
+            rpt.setReportName("productlist"); //productlist is the name of my jasper file.
+            rpt.callReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         });
         btn3.setPrefWidth(200);
         GridPane grid1=new GridPane();
@@ -459,8 +493,8 @@ Date date = new Date();
      Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "INSERT INTO `transaction`(`item_name`, `qty`, `price`, `date`, `time`)"
-                + " VALUES (?,?,?,?,?)";
+        String selectSQL = "INSERT INTO `transaction`(`item_name`, `qty`, `price`, `date`, `time`, `invoiceNum`)"
+                + " VALUES (?,?,?,?,?,?)";
         
         try {
             dbConnection = connection.getDBConnection();
@@ -470,6 +504,7 @@ Date date = new Date();
             preparedStatement.setDouble(3, price);
               preparedStatement.setString(4, date);
             preparedStatement.setString(5, time);
+             preparedStatement.setString(6, invNum.getText());
             // execute select SQL stetement
             int rs = preparedStatement.executeUpdate();
             
@@ -496,8 +531,8 @@ Date date = new Date();
      Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "INSERT INTO `extra`(`name`, `qty`, `price`, `description`, `date`) VALUES"
-                + "(?,?,?,?,?)";
+        String selectSQL = "INSERT INTO `extra`(`item_name`, `qty`, `price`, `description`, `date`,`invoiceNum`) VALUES"
+                + "(?,?,?,?,?,?)";
         
         try {
             dbConnection = connection.getDBConnection();
@@ -507,6 +542,7 @@ Date date = new Date();
             preparedStatement.setDouble(3, price);
               preparedStatement.setString(4, desc);
             preparedStatement.setString(5, date);
+            preparedStatement.setString(6, invNum.getText());
             // execute select SQL stetement
             int rs = preparedStatement.executeUpdate();
             
@@ -610,7 +646,7 @@ Date date = new Date();
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "delete from extra where name = ?";
+        String selectSQL = "delete from extra where item_name = ?";
         
         try {
             dbConnection = connection.getDBConnection();
@@ -686,6 +722,46 @@ Date date = new Date();
             }
             
         }
+        
+    }
+   String getInvNum() throws SQLException {
+        
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "SELECT COUNT(*) FROM transaction";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+           
+            // execute select SQL stetement
+            ResultSet rs = preparedStatement.executeQuery();
+            String result = null;
+            int fond;
+            if (rs.next()) {
+                 return rs.getString(1);
+                
+          
+            }
+           
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        return null;
         
     }
 }
