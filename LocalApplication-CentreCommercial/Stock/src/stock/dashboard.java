@@ -57,14 +57,39 @@ public class dashboard extends Application {
         
         table.setPrefWidth(350);
         table.setPrefHeight(600);
-       
         ObservableList<PieChart.Data> pieChartData =
-                FXCollections.observableArrayList(
-                        new PieChart.Data("Panadol", 13),
-                        new PieChart.Data("nexium", 25),
-                        new PieChart.Data("supralex", 10),
-                        new PieChart.Data("Calcivita", 22),
-                        new PieChart.Data("nerobion", 30));
+                FXCollections.observableArrayList();
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "SELECT SUM(qty),item_name FROM transaction group by item_name limit 5";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+           
+            ResultSet rs = preparedStatement.executeQuery();
+            
+            while (rs.next()) {
+              pieChartData.add(new PieChart.Data(rs.getString(2), rs.getInt(1)));
+            }
+             //data of table view
+        
+        }
+            
+            
+        catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+           
+        } finally {
+            
+          
+            
+        }
+        
+    
+        
         final PieChart chart = new PieChart(pieChartData);
         final Label caption = new Label("");
         caption.setTextFill(Color.DARKORANGE);
@@ -270,7 +295,7 @@ public class dashboard extends Application {
                 data1.add(new transactions(name, date, type));
             }
             while (rs1.next()){
-                String name1=rs1.getString("name");
+                String name1=rs1.getString("item_name");
                 String date1=rs1.getString("date");
                 String type1="extra";
                 data1.add(new transactions(name1, date1, type1));
