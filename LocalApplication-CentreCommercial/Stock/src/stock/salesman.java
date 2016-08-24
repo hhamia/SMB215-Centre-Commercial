@@ -1,847 +1,510 @@
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package stock;
-
-import java.io.File;
-import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.util.Callback;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Locale;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.css.PseudoClass;
-import javafx.stage.FileChooser;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-public class salesman extends Application {
-    TextField sear_txt=new TextField();
-    int idcount;
-    static final ObservableList<Person> data0 =
-            FXCollections.observableArrayList();
-    ObservableList<company.Person> data1 =company.data1;
-    ObservableList<family.Person> data2 =family.data2;
-    Connection dbConnection = null;
-    Stage compStage=new Stage(StageStyle.DECORATED);
-    Stage famStage=new Stage(StageStyle.DECORATED);
-    GridPane grid1=new GridPane();
-    String imagepath="";
-    PreparedStatement preparedStatement = null;
-    PreparedStatement preparedStatement1 = null;
-    PreparedStatement preparedStatement2 = null;
-    private final TableView<Person> table = new TableView<Person>();
-    private final ObservableList<Person> data =
-            FXCollections.observableArrayList();
-    TextField t2=new TextField();
-        TextField t3=new TextField();
-        TextField t4=new TextField();
-        TextField t5=new TextField();
-        TextField t6=new TextField();
-        TextField t7=new TextField();
-        TextField t8=new TextField();
-        TextField t9=new TextField();
-        TextField t10=new TextField();
-        TextField t11=new TextField();
-    final HBox hb = new HBox();
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
+import report.Report;
+
+
+//declared class sales item/
+//class public include all functions and other classes
+public class saleItem extends Application {
+    public static int invoicenumber;
+    double TotalPrice1;// Sum of all prices
+    int itemqty1;//quantity selected from database
+    TextField barItem=new TextField();
+    TextField text1;
+    TextField text2;
+    TextField text3;
+    TextField text4;
+    private final TableView<items> table = new TableView<>();
+     public  static ObservableList<items> data =
+            FXCollections.observableArrayList(); //data to get item from class item 
+    Pane panel1=new Pane();
+    Label Total=new Label("Total (L.L)");
+    Label TotalPrice=new Label("0.0");
+    Label invNum=new Label();
+     Label curr=new Label("L.L");
+    int itemqty;
+    @Override
+    public void start(Stage primaryStage) {
+        Connection dbConnection = null;
+        dbConnection = connection.getDBConnection();
+        
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();// width and height of screen
+        Total.setId("total");
+        VBox vbox1=new VBox();
+        HBox hbox1=new HBox();
+        hbox1.setPrefHeight(50);
+        HBox hbox2=new HBox();
+        hbox2.setPrefHeight(50);
+        hbox1.setStyle("-fx-background-color:gray");
+        hbox1.setSpacing(200);
+        TotalPrice.setId("total");
+        hbox1.getChildren().add(Total);
+        hbox1.getChildren().add(TotalPrice);
+        hbox1.getChildren().add(invNum);
+        Stage printerStage1=new Stage(StageStyle.DECORATED);
+        Label l1=new Label("Extra sales");
+        Label l2=new Label("Extra item");
+        Label l3=new Label("Extra price");
+        Label l4=new Label("Extra qty");
+        Label l5=new Label("Extra Description");
+        try {
+            invNum.setText(getInvNum());
+        } catch (SQLException ex) {
+            Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        text1=new TextField();
+        // enable textfield to accept only numbers
+        text2=new TextField(){
+            @Override public void replaceText(int start, int end, String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceText(start, end, text);
+                }
+            }
+            
+            @Override public void replaceSelection(String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceSelection(text);
+                }
+            }
+        };
+        text3=new TextField(){
+            @Override public void replaceText(int start, int end, String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceText(start, end, text);
+                }
+            }
+            
+            @Override public void replaceSelection(String text) {
+                if (text.matches("[0-9]*")) {
+                    super.replaceSelection(text);
+                }
+            }
+        };
+        text4=new TextField();
+        text1.setPrefSize(200, 30);
+        text2.setPrefSize(200, 30);
+        text3.setPrefSize(200, 30);
+        text4.setPrefSize(200, 30);
+        Button btn2=new Button("Add extra item");
+        btn2.setPrefWidth(200);
+        Button btn3=new Button("Generate Invoice");
+        btn3.setOnAction((event)->{
+            invoicenumber=Integer.parseInt(invNum.getText());
+           Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = stock.connection.getDBConnection();
+            statement = connection.createStatement();
+            HashMap parameterMap = new HashMap();
+            parameterMap.put("rtitle", "Report Title Here");//sending the report title as a parameter.
+            Report rpt = new Report(parameterMap, connection);
+            rpt.setReportName("productlist"); //productlist is the name of my jasper file.
+            rpt.callReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        });
+        btn3.setPrefWidth(200);
+        GridPane grid1=new GridPane();
+        grid1.setVgap(10);
+        grid1.setHgap(10);
+        grid1.add(l1, 0, 0);
+        grid1.add(l2, 1, 1);
+        grid1.add(l3, 3, 1);
+        grid1.add(l4, 5, 1);
+        grid1.add(l5, 7, 1);
+        grid1.add(text1, 2, 1);
+        grid1.add(text2, 4, 1);
+        grid1.add(text3, 6, 1);
+        grid1.add(text4, 8, 1);
+        grid1.add(btn2, 4, 2);
+        grid1.add(btn3, 6, 2);
+        // add extra items to tableview and data
+        btn2.setOnAction((event) -> {
+            if(checkrequiredField()==false){
+                String extraname=text1.getText();
+                String extradesc=text4.getText();
+                double extraprice=Double.valueOf(text2.getText());
+                int extraqty=Integer.parseInt(text3.getText());
+                data.add(new items(extraname,extraprice,extraqty,extradesc,"Extra items"));
+                TotalPrice1=TotalPrice1+(extraprice*extraqty);
+                   TotalPrice.setText(String.valueOf(TotalPrice1));
+                try {
+                    insertIntoextra(extraname, extraqty, extraprice, extradesc, getDate());//instert data to extra table
+                } catch (SQLException ex) {
+                    Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                barItem.clear();
+                clearFields();
+            }
+        });
+        hbox2.getChildren().add(grid1);
+        //Adding the Button to the cell
+        
+        table.setPrefWidth(primaryScreenBounds.getWidth());
+        table.setPrefHeight(primaryScreenBounds.getHeight()/1.5);
+        table.setRowFactory((TableView<items> tableView) -> {//right click remove row
+            final TableRow<items> row = new TableRow<>();
+            final ContextMenu contextMenu = new ContextMenu();
+            final MenuItem removeMenuItem = new MenuItem("Remove item");
+            removeMenuItem.setOnAction((ActionEvent event) -> {
+            items item = table.getSelectionModel().getSelectedItem();         
+                table.getItems().remove(row.getItem());
+                if("Extra items".equals(item.getReste())){
+                try {
+                    deletFromextra(item.getItemName());//delete data from extra table 
+                    TotalPrice1=TotalPrice1-(item.getPrice()*item.getQty());
+                    TotalPrice.setText(String.valueOf(TotalPrice1));
+                } catch (SQLException ex) {
+                    Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                else{
+                try {
+                    deletFromtrans(item.getItemName(), itemqty1+1);//delete data from transaction table
+                    TotalPrice1=TotalPrice1-item.getPrice();
+                    TotalPrice.setText(String.valueOf(TotalPrice1));
+                   updatetotable(item.getItemName());
+                } catch (SQLException ex) {
+                    Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                }
+                barItem.requestFocus();
+            });
+            contextMenu.getItems().add(removeMenuItem);
+            // Set context menu on row, but use a binding to make it only show for non-empty rows:
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu)null)
+                            .otherwise(contextMenu)
+            );
+            return row ;
+        });  
+        //set tablecolumn names to accept data values
+        TableColumn Itemnamecol=new TableColumn("Item Name");
+        Itemnamecol.setPrefWidth(300);
+        Itemnamecol.setCellValueFactory(
+                new PropertyValueFactory<>("ItemName"));
+        TableColumn descripCol=new TableColumn("Description");
+        descripCol.setPrefWidth(700);
+        descripCol.setCellValueFactory(
+                new PropertyValueFactory<>("Description"));
+        TableColumn PriceCol=new TableColumn("Price");
+        PriceCol.setPrefWidth(100);
+        PriceCol.setCellValueFactory(
+                new PropertyValueFactory<>("Price"));
+        
+        
+        TableColumn QtyCol=new TableColumn("Qty");
+        QtyCol.setPrefWidth(100);
+        QtyCol.setCellValueFactory(
+                new PropertyValueFactory<>("Qty"));
+        TableColumn QtyResCol=new TableColumn("Qty Reste");
+        QtyResCol.setPrefWidth(170);
+        QtyResCol.setCellValueFactory(
+                new PropertyValueFactory<>("Reste"));
+        
+        table.setItems(data);
+        table.getColumns().addAll(Itemnamecol,descripCol,PriceCol,QtyCol,QtyResCol);
+        BorderPane root = new BorderPane();
+        
+        //baritem textfield action slecte data by barr code or item name
+        barItem.setOnAction((event) -> {
+            
+            try {
+                selectRecordsFromTable(barItem.getText());
+            } catch (SQLException ex) {
+                Logger.getLogger(saleItem.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            barItem.clear();
+        });
+        vbox1.getChildren().add(barItem);
+        barItem.setPrefWidth(primaryScreenBounds.getWidth());
+        barItem.setPrefHeight(primaryScreenBounds.getWidth()/30);
+        barItem.setPromptText("enter item or barcode here");
+        vbox1.getChildren().add(table);
+        vbox1.getChildren().add(hbox1);
+        vbox1.getChildren().add(hbox2);
+        root.setTop(vbox1);
+        Scene scene = new Scene(root, 800, 550);
+        
+        String css =this.getClass().getResource("items.css").toExternalForm();
+        scene.getStylesheets().add(css);
+        
+        primaryStage.setX(primaryScreenBounds.getMinX());
+        primaryStage.setY(primaryScreenBounds.getMinY());
+        primaryStage.setWidth(primaryScreenBounds.getWidth());
+        primaryStage.setHeight(primaryScreenBounds.getHeight());
+        primaryStage.setMaximized(true);
+        Image ico = new Image("images/Add-item-icon.png");
+        primaryStage.getIcons().add(ico);
+        primaryStage.setTitle("sale items");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        
+        
+        
+    }
+    // class items, requierd all variable for items needed to append data and tableview
+    public static class items {
+        private final SimpleStringProperty ItemName;
+        private final SimpleDoubleProperty Price;
+        private final SimpleIntegerProperty Qty;
+        private final SimpleStringProperty Description;
+        private final SimpleStringProperty Reste;
+        private items(String Itemnamevar,double Pricevar,int Qtyvar,String Desc,String RestVar){
+            this.ItemName = new SimpleStringProperty(Itemnamevar);
+            this.Price = new SimpleDoubleProperty(Pricevar);
+            this.Qty = new SimpleIntegerProperty(Qtyvar);
+            this.Description = new SimpleStringProperty(Desc);
+            this.Reste = new SimpleStringProperty(RestVar);
+        }
+        public String getItemName() {
+            return ItemName.get();
+        }
+        
+        public void setItemName(String itemName) {
+            ItemName.set(itemName);
+        }
+        public String getDescription() {
+            return Description.get();
+        }
+        
+        public void setDescription(String itemDesc) {
+            Description.set(itemDesc);
+        }
+        public double getPrice() {
+            return Price.get();
+        }
+        
+        public void setPrice(double itemprice) {
+            Price.set(itemprice);
+        }
+        public int getQty() {
+            return Qty.get();
+        }
+        
+        public void setQty(int itemqty) {
+            Qty.set(itemqty);
+        }
+        public String getReste() {
+            return Reste.get();
+        }
+        
+        public void setReste(String ResV) {
+            Reste.set(ResV);
+        }
+    }
     
     public static void main(String[] args) {
         launch(args);
     }
-    
-    @Override
-    public void start(Stage stage) {
+    void selectRecordsFromTable(String S) throws SQLException {
         
-       
-        
-            
-        selectCustomerFrom();
-        HBox des=new HBox();
-        GridPane dess=new GridPane();
-        dess.setHgap(10);
-        dess.setVgap(10);
-        Button save=new Button("Save");
-        Button clear=new Button("Clear Fields");
-        save.setPrefWidth(200);
-        clear.setPrefWidth(200);
-        Image img1 = new Image("images/contact.png");
-        ImageView imgview1=new ImageView(img1);
-        imgview1.setFitHeight(300);
-        imgview1.setFitWidth(300);
-        Button addimage=new Button("add image");
-        addimage.setPrefWidth(300);
-        addimage.setOnAction((event) -> {
-            FileChooser chooser = new FileChooser();
-    chooser.setTitle("Open File");
-    File file = chooser.showOpenDialog(new Stage());
-    if(file != null) {
-         imagepath = file.getPath();
-        
-        Image image = new Image("file:///"+imagepath);
-        imgview1.setImage(image);
-    }           
-        });
-        VBox v1=new VBox();
-        
-        grid1.setVgap(10);grid1.setHgap(10);
-        Label l1=new Label("Personnal Information");
-        l1.setId("l1");
-        l1.setPrefSize(1000, 30);
-        l1.setStyle("-fx-background-color: gray;-fx-font-size: 14px;");
-        Label l2=new Label("First Name");
-        Label l3=new Label("Company");
-        Label l4=new Label("Street address 1");
-        Label l5=new Label("City");
-        Label l6=new Label("ZIP/Postal Code");
-        Label l7=new Label("Fax");
-        Label l8=new Label("Last Name");
-        Label l9=new Label("Phone");
-        Label l10=new Label("Street address 2");
-        Label l11=new Label("State/Province");
-        Label l12=new Label("Country");
-        Label l13=new Label("Type");
-        
-        
-         final PseudoClass errorClass = PseudoClass.getPseudoClass("error");
-
-
-         
-        ComboBox<String> c1=new ComboBox<>();
-        
-        String[] locales = Locale.getISOCountries();
-        
-        for (String countryCode : locales) {
-            
-            Locale obj = new Locale("", countryCode);
-            
-            c1.getItems().add(obj.getDisplayCountry());
-            c1.getSelectionModel().selectFirst();
-            c1.setEditable(true);
-        }
-        ComboBox<String> c2 = new ComboBox<>(FXCollections.observableArrayList("Simgle","Company","Family"));
-        
-         
-        c2.getSelectionModel().selectFirst();
-        c2.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue ov, Object t, Object t1) {
-                if("Company".equals(c2.getValue())){
-                company cop=new company();
-                cop.start(compStage);
-                }
-                 if("Family".equals(c2.getValue())){
-                family fam=new family();
-                fam.start(famStage);
-                }
-            }
-        });
-        
-        save.setOnAction((event) -> {
-            
-        
-         
-          if(checkrequiredField()==true){
-              
-          }   
-          else{
-         String fname=t2.getText();
-         String company=t3.getText();
-         String stt1=t4.getText();
-         String city=t5.getText();
-         String zip=t6.getText();
-         String fax=t7.getText();
-         String lname=t8.getText();
-         String phone=t9.getText();
-         String stt2=t10.getText();
-         String sp=t11.getText();
-         String country=c1.getValue();
-         String type=c2.getValue();
-         idcount=idcount+1;
-             data.add(new Person(String.valueOf(idcount),fname, company, stt1,city,zip,fax,lname,phone,stt2,sp,country,type));
-          String insertSQL = "INSERT INTO `salesman`(`fname`, `lname`, `company`, "
-                  + "`phone`, `str1`, `str2`, `city`, `state`, `zip`, `country`, `fax`, `type`, `picture`)"
-                  + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-          String insertSQL1 ="INSERT INTO `company`(`customerPhone`,`fname`, `lastName`, `phone`)"
-                  + " VALUES (?,?,?,?)";
-           String insertSQL2 ="INSERT INTO `family`(`customerPhone`,`fname`, `lastName`, `phone`)"
-                  + " VALUES (?,?,?,?)";
-        try {
-            dbConnection = connection.getDBConnection();
-            preparedStatement = dbConnection.prepareStatement(insertSQL);
-            preparedStatement1 = dbConnection.prepareStatement(insertSQL1);
-            preparedStatement2 = dbConnection.prepareStatement(insertSQL2);
-            preparedStatement.setString(1, fname);
-            preparedStatement.setString(2, lname);
-            preparedStatement.setString(3, company);
-            preparedStatement.setString(4, phone);
-            preparedStatement.setString(5, stt1);
-            preparedStatement.setString(6, stt2);
-            preparedStatement.setString(7, city);
-            preparedStatement.setString(8, sp);
-            preparedStatement.setString(9, zip);
-            preparedStatement.setString(10, country);
-            preparedStatement.setString(11, fax);
-            preparedStatement.setString(12, type);
-            preparedStatement.setString(13, imagepath);
-             
-            
-                 int rs = preparedStatement.executeUpdate();
-            if(data1.size()>0){     
-            for(int i=0;i<data1.size();i++){
-                preparedStatement1.setString(1, phone);
-                preparedStatement1.setString(2, data1.get(i).getFirstName());
-                preparedStatement1.setString(3, data1.get(i).getLastName());
-                preparedStatement1.setString(4, data1.get(i).getPhone());
-                
-                int rs1 = preparedStatement1.executeUpdate();
-            }
-            }
-             if(data2.size()>0){     
-            for(int i=0;i<data2.size();i++){
-                preparedStatement2.setString(1, phone);
-                preparedStatement2.setString(2, data2.get(i).getFirstName());
-                preparedStatement2.setString(3, data2.get(i).getLastName());
-                preparedStatement2.setString(4, data2.get(i).getPhone());
-                
-                int rs2 = preparedStatement2.executeUpdate();
-            }
-            }
-            clearFields();
-            resetrequiredField();
-            
-        } catch (SQLException e) {
-            
-            System.out.println(e.getMessage());
-           
-        } finally {
-            
-          
-            
-        }   
-          }
-        });
-         
-       clear.setOnAction((event) -> {
-         clearFields();
-         resetrequiredField();
-       });
-        grid1.add(l2, 1, 1);grid1.add(l8, 3, 1);
-        grid1.add(l3, 1, 2);grid1.add(l9, 3, 2);
-        grid1.add(l4, 1, 3);grid1.add(l10, 3, 3);
-        grid1.add(l5, 1, 4);grid1.add(l11, 3, 4);
-        grid1.add(l6, 1, 5);grid1.add(l12, 3, 5);
-        grid1.add(l7, 1, 6);grid1.add(l13, 3, 6);
-        grid1.add(t2, 2, 1);grid1.add(t8, 4, 1);
-        grid1.add(t3, 2, 2);grid1.add(t9, 4, 2);
-        grid1.add(t4, 2, 3);grid1.add(t10, 4, 3);
-        grid1.add(t5, 2, 4);grid1.add(t11, 4, 4);
-        grid1.add(t6, 2, 5);grid1.add(c1, 4, 5);
-        grid1.add(t7, 2, 6);grid1.add(c2, 4, 6);
-        grid1.add(save, 2, 7);grid1.add(clear, 4, 7);
-        v1.getChildren().add(l1);
-        v1.getChildren().add(grid1);
-        VBox imgBtn=new VBox();
-        imgBtn.setStyle("-fx-padding: 5;" + 
-                      "-fx-border-style: solid inside;" + 
-                      "-fx-border-width: 2;" +
-                      "-fx-border-insets: 5;" + 
-                      "-fx-border-radius: 5;" + 
-                      "-fx-border-color: gray;");
-        imgBtn.getChildren().addAll(imgview1,addimage);
-        des.getChildren().addAll(v1,dess,imgBtn);
-        
-        Scene scene = new Scene(new Group());
-        stage.setTitle("Salesman");
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        double widthVar=(primaryScreenBounds.getWidth())/12;
-        table.setPrefWidth(primaryScreenBounds.getWidth());
-        //set Stage boundaries to visible bounds of the main screen
-        stage.setX(primaryScreenBounds.getMinX());
-        stage.setY(primaryScreenBounds.getMinY());
-        stage.setWidth(primaryScreenBounds.getWidth());
-        stage.setHeight(primaryScreenBounds.getHeight());
-        
-        final Label label = new Label("Address Book");
-        label.setFont(new Font("Arial", 20));
-        
-        table.setEditable(true);
-        Callback<TableColumn, TableCell> cellFactory =
-                new Callback<TableColumn, TableCell>() {
-                    public TableCell call(TableColumn p) {
-                        return new EditingCell();
-                    }
-                };
-         TableColumn idcol = new TableColumn("ID");
-        idcol.setMinWidth(10);
-        idcol.setCellValueFactory(
-                new PropertyValueFactory<>("ID"));
-       // idcol.setCellFactory(cellFactory);
-        
-        TableColumn firstNameCol = new TableColumn("First Name");
-        firstNameCol.setMinWidth(widthVar);
-        firstNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("firstName"));
-        firstNameCol.setCellFactory(cellFactory);
-        firstNameCol.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setFirstName(t.getNewValue());
-                    }
-                }
-        );
-        
-        TableColumn st1 = new TableColumn("Last Name");
-        st1.setMinWidth(widthVar);
-        st1.setCellValueFactory(
-                new PropertyValueFactory<>("lastName"));
-        st1.setCellFactory(cellFactory);
-        st1.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setLastName(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st2 = new TableColumn("Company");
-        st2.setMinWidth(widthVar);
-        st2.setCellValueFactory(
-                new PropertyValueFactory<>("company"));
-        st2.setCellFactory(cellFactory);
-        st2.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setCompany(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st3 = new TableColumn("Street address 1");
-        st3.setMinWidth(widthVar);
-        st3.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("stadd1"));
-        st3.setCellFactory(cellFactory);
-        st3.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setStadd1(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st4 = new TableColumn("City");
-        st4.setMinWidth(widthVar);
-        st4.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("city"));
-        st4.setCellFactory(cellFactory);
-        st4.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setCity(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st5 = new TableColumn("Zip/Postal Code");
-        st5.setMinWidth(widthVar);
-        st5.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("zip"));
-        st5.setCellFactory(cellFactory);
-        st5.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setZip(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st6 = new TableColumn("Fax");
-        st6.setMinWidth(widthVar);
-        st6.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("fax"));
-        st6.setCellFactory(cellFactory);
-        st6.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setFax(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st7 = new TableColumn("Phone");
-        st7.setMinWidth(widthVar);
-        st7.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("phone"));
-        st7.setCellFactory(cellFactory);
-        st7.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setPhone(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st8 = new TableColumn("Street address 2");
-        st8.setMinWidth(widthVar);
-        st8.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("stadd2"));
-        st8.setCellFactory(cellFactory);
-        st8.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setStadd2(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st9 = new TableColumn("State/Province");
-        st9.setMinWidth(widthVar);
-        st9.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("state"));
-        st9.setCellFactory(cellFactory);
-        st9.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setState(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st10 = new TableColumn("Country");
-        st10.setMinWidth(widthVar);
-        st10.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("country"));
-        st10.setCellFactory(cellFactory);
-        st10.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setCountry(t.getNewValue());
-                    }
-                }
-        );
-        TableColumn st11 = new TableColumn("Type");
-        st11.setMinWidth(widthVar);
-        st11.setCellValueFactory(
-                new PropertyValueFactory<Person, String>("type"));
-        st11.setCellFactory(cellFactory);
-        st11.setOnEditCommit(
-                new EventHandler<CellEditEvent<Person, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<Person, String> t) {
-                        ((Person) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                                ).setType(t.getNewValue());
-                    }
-                }
-        );
-        table.setItems(data);
-        table.getColumns().addAll(idcol,firstNameCol, st1,st2,st3,st4,st5,st6,st7,st8,st9,st10,st11);
-         sear_txt.textProperty().addListener((javafx.beans.Observable observable) -> {
-            if(sear_txt.textProperty().get().isEmpty()) {
-                table.setItems(data);
-                return;
-            }
-            ObservableList<Person> tableItems = FXCollections.observableArrayList();
-            ObservableList<TableColumn<Person, ?>> cols = table.getColumns();
-            for (Person data11 : data) {
-                for (TableColumn<Person, ?> col1 : cols) {
-                    TableColumn col = col1;
-                    String cellValue = col.getCellData(data11).toString();
-                    cellValue = cellValue.toLowerCase();
-                    if (cellValue.contains(sear_txt.textProperty().get().toLowerCase())) {
-                        tableItems.add(data11);
-                        break;
-                    }
-                }
-            }
-            table.setItems(tableItems);
-        });
-        
-        
-        final VBox vbox = new VBox();
-        vbox.setSpacing(5);
-        
-        
-        vbox.setPadding(new Insets(10, 0, 0, 10));
-        vbox.getChildren().addAll(label, sear_txt,table, hb);
-        BorderPane root1 = new BorderPane();
-        root1.setLeft(vbox);
-        root1.setTop(des);
-        
-        scene=new Scene(root1);
-        String css =this.getClass().getResource("salesman.css").toExternalForm();
-        scene.getStylesheets().add(css);
-        Image ico = new Image("images/customer-service.png");
-        stage.getIcons().add(ico);
-        stage.setScene(scene);
-        stage.setMaximized(true);
-        stage.show();
-        
-        
-    }
-
-    private void clearFields() {
-  t2.setText("");
-  t3.setText("");
-  t4.setText("");
-  t5.setText("");
-  t6.setText("");
-  t7.setText("");
-  t8.setText("");
-  t9.setText("");
-  t10.setText("");
-  t11.setText("");
-  
-}
-    private boolean checkrequiredField(){
-        if("".equals(t2.getText())){
-            t2.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t2.requestFocus();
-            return true;
-        }
-        else if("".equals(t3.getText())){
-            t3.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t3.requestFocus();
-            return true;
-        }
-        else if("".equals(t4.getText())){
-            t4.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t4.requestFocus();
-            return true;
-        }
-        else if("".equals(t5.getText())){
-            t5.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t5.requestFocus();
-            return true;
-        }
-        else if("".equals(t6.getText())){
-            t6.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t6.requestFocus();
-            return true;
-        }
-        else if("".equals(t7.getText())){
-            t7.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t7.requestFocus();
-            return true;
-        }
-        else if("".equals(t8.getText())){
-            t8.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t8.requestFocus();
-            return true;
-        }
-        else if("".equals(t9.getText())){
-            t9.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t9.requestFocus();
-            return true;
-        }
-        else if("".equals(t10.getText())){
-            t10.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t10.requestFocus();
-            return true;
-        }
-        else if("".equals(t11.getText())){
-            t11.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
-            t11.requestFocus();
-            return true;
-        }
-        else{
-            return false;
-        }
-        
-    }
-    
-     private void resetrequiredField(){
-       
-            t2.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-         
-            t3.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-          
-            t4.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-          
-            t5.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-            t6.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-            t7.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-            t8.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-            t9.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-            
-            t10.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-            t11.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
-           
-        
-    }
-
-    public static class Person {
-        private final SimpleStringProperty ID;
-        private final SimpleStringProperty firstName;
-        private final SimpleStringProperty lastName;
-        private final SimpleStringProperty company;
-        private final SimpleStringProperty stadd1;
-        private final SimpleStringProperty city;
-        private final SimpleStringProperty zip;
-        private final SimpleStringProperty fax;
-        private final SimpleStringProperty phone;
-        private final SimpleStringProperty stadd2;
-        private final SimpleStringProperty state;
-        private final SimpleStringProperty country;
-        private final SimpleStringProperty type;
-        
-        private Person(String IDvar,String fName, String lName, String varcompany,String varstadd1,String varcity
-                ,String varzip,String varfax,String varphone,String varstadd2,String varstate,String varcountry,String vartype
-        ) {
-            this.ID = new SimpleStringProperty(IDvar);
-            this.firstName = new SimpleStringProperty(fName);
-            this.lastName = new SimpleStringProperty(lName);
-            this.company = new SimpleStringProperty(varcompany);
-            this.stadd1 = new SimpleStringProperty(varstadd1);
-            this.city = new SimpleStringProperty(varcity);
-            this.zip =new SimpleStringProperty(varzip);
-            this.fax = new SimpleStringProperty(varfax);
-            this.phone = new SimpleStringProperty(varphone);
-            this.stadd2 = new SimpleStringProperty(varstadd2);
-            this.state = new SimpleStringProperty(varstate);
-            this.country = new SimpleStringProperty(varcountry);
-            this.type = new SimpleStringProperty(vartype);
-            
-            
-        }
-        public String getID() {
-            return ID.get();
-        }
-        
-        public void setID(String IDvar) {
-            ID.set(IDvar);
-        }
-        public String getFirstName() {
-            return firstName.get();
-        }
-        
-        public void setFirstName(String fName) {
-            firstName.set(fName);
-        }
-        
-        public String getLastName() {
-            return lastName.get();
-        }
-        
-        public void setLastName(String lName) {
-            lastName.set(lName);
-        }
-        public String getCompany() {
-            return company.get();
-        }
-        
-        public void setCompany(String varcompany) {
-            company.set(varcompany);
-        }
-        
-        public String getStadd1() {
-            return stadd1.get();
-        }
-        
-        public void setStadd1(String varstadd1) {
-            stadd1.set(varstadd1);
-        }
-        public String getCity() {
-            return city.get();
-        }
-        
-        public void setCity(String varcity) {
-            city.set(varcity);
-        }
-        
-        public String getZip() {
-            return zip.get();
-        }
-        
-        public void setZip(String varzip) {
-            zip.set(varzip);
-        }
-        public String getFax() {
-            return fax.get();
-        }
-        
-        public void setFax(String varfax) {
-            fax.set(varfax);
-        }
-        
-        public String getPhone() {
-            return phone.get();
-        }
-        
-        public void setPhone(String varphone) {
-            phone.set(varphone);
-        }
-        public String getStadd2() {
-            return stadd2.get();
-        }
-        
-        public void setStadd2(String varstadd2) {
-            stadd2.set(varstadd2);
-        }
-        
-        public String getState() {
-            return state.get();
-        }
-        
-        public void setState(String varstate) {
-            state.set(varstate);
-        }
-        public String getCountry() {
-            return country.get();
-        }
-        
-        public void setCountry(String varcountry) {
-            country.set(varcountry);
-        }
-        
-        public String getType() {
-            return type.get();
-        }
-        
-        public void setType(String vartype) {
-            type.set(vartype);
-        }
-        
-    }
-    
-    class EditingCell extends TableCell<Person, String> {
-        
-        private TextField textField;
-        
-        public EditingCell() {
-        }
-        
-        @Override
-        public void startEdit() {
-            if (!isEmpty()) {
-                super.startEdit();
-                createTextField();
-                setText(null);
-                setGraphic(textField);
-                textField.selectAll();
-            }
-        }
-        
-        @Override
-        public void cancelEdit() {
-            super.cancelEdit();
-            
-            setText((String) getItem());
-            setGraphic(null);
-        }
-        
-        @Override
-        public void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            
-            if (empty) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                if (isEditing()) {
-                    if (textField != null) {
-                        textField.setText(getString());
-                       
-                    }
-                    setText(null);
-                    setGraphic(textField);
-                } else {
-                    setText(getString());
-                    setGraphic(null);
-                }
-            }
-        }
-        
-        private void createTextField() {
-            textField = new TextField(getString());
-            textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()* 2);
-            textField.focusedProperty().addListener(new ChangeListener<Boolean>(){
-                @Override
-                public void changed(ObservableValue<? extends Boolean> arg0,
-                        Boolean arg1, Boolean arg2) {
-                    if (!arg2) {
-                        commitEdit(textField.getText());
-                        Person p = table.getSelectionModel().getSelectedItem();
-                         Connection dbConnection = null;
+        Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "UPDATE `salesman` SET `fname`=?,`lname`=?,`company`=?,`phone`=?,`str1`=?,`str2`=?,`city`=?,"
-                + "`state`=?,`zip`=?,`country`=?,`fax`=?,`type`=? WHERE idsalesman=?";
+        String selectSQL = "SELECT * FROM items WHERE barcode = ? or name = ?";
         
         try {
             dbConnection = connection.getDBConnection();
             preparedStatement = dbConnection.prepareStatement(selectSQL);
+            preparedStatement.setString(1, S);
+            preparedStatement.setString(2, S);
+            // execute select SQL stetement
+            ResultSet rs = preparedStatement.executeQuery();
+            String result = null;
+            int fond;
+            if (rs.next()) {
+                int itemqty1=rs.getInt("qty");
+                fond=rs.getInt("fond");
+                itemqty=itemqty1-1;
+                if(itemqty1<fond && itemqty1>0){
+                    result=itemqty+" low than "+fond+" items";
+                    String itemname = rs.getString("name");
+                    String desc = rs.getString("description");
+                    double price = rs.getDouble("price");
+                    data.add(new items(itemname, price, 1, desc,result));
+                    insertIntoTransaction(itemname,1,price,getDate(),"");
+                     TotalPrice1=TotalPrice1+price;
+                   TotalPrice.setText(String.valueOf(TotalPrice1));
+                    updatetotable(itemname);
+                }
+                
+                else if(itemqty1==0){
+                    
+                    result=itemqty1+" no items qty available";
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Message");
+                    alert.setHeaderText(result);
+                    alert.setContentText(result);
+                    
+                    alert.showAndWait();
+                }
+                else{
+                    String itemname = rs.getString("name");
+                    String desc = rs.getString("description");
+                    double price = rs.getDouble("price");
+                    result=itemqty+" qty available";
+                    
+                    data.add(new items(itemname, price, 1, desc,result));
+                    insertIntoTransaction(itemname,1,price,getDate(),"");
+                    TotalPrice1=TotalPrice1+price;
+                     TotalPrice.setText(String.valueOf(TotalPrice1));
+                    updatetotable(barItem.getText());
+                }
+                
+                
+                
+            }
+            else{
+                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Message");
+                alert.setHeaderText("Item not found");
+                alert.setContentText("Item not found");
+                
+                alert.showAndWait();
+            }
             
-            preparedStatement.setString(1,p.getFirstName());
-            preparedStatement.setString(2, p.getLastName());
-            preparedStatement.setString(3, p.getCompany());
-            preparedStatement.setString(4, p.getPhone());
-            preparedStatement.setString(5, p.getStadd1());
-            preparedStatement.setString(6, p.getStadd2());
-            preparedStatement.setString(7, p.getCity());
-            preparedStatement.setString(8, p.getState());
-            preparedStatement.setString(9, p.getZip());
-            preparedStatement.setString(10, p.getCountry());
-            preparedStatement.setString(11, p.getFax());
-            preparedStatement.setString(12, p.getType());
-            preparedStatement.setInt(13,Integer.parseInt(p.getID()));
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        
+    }
+     public String getDate(){
+         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+Date date = new Date();
+
+        return dateFormat.format(date);
+     }
+    private void clearFields() {
+        text1.setText("");
+        text2.setText("");
+        text3.setText("");
+        text4.setText("");
+        text1.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+        
+        text2.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+        
+        text3.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+        
+        text4.setStyle("-fx-border-color: white ; -fx-border-width: 2px ;");
+        
+    }
+    
+    private boolean checkrequiredField(){
+        if("".equals(text1.getText())){
+            text1.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            text1.requestFocus();
+            return true;
+        }
+        else if("".equals(text2.getText())){
+            text2.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            text2.requestFocus();
+            return true;
+        }
+        else if("".equals(text3.getText())){
+            text3.setStyle("-fx-border-color: red ; -fx-border-width: 2px ;");
+            text3.requestFocus();
+            return true;
+        }
+        
+        else{
+            return false;
+        }
+    }
+    
+    
+  
+  
+    void insertIntoTransaction(String itemname,int qty,double price,String date,String time) throws SQLException{
+     Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "INSERT INTO `transaction`(`item_name`, `qty`, `price`, `date`, `time`, `invoiceNum`)"
+                + " VALUES (?,?,?,?,?,?)";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            preparedStatement.setString(1, itemname);
+            preparedStatement.setInt(2, qty);
+            preparedStatement.setDouble(3, price);
+              preparedStatement.setString(4, date);
+            preparedStatement.setString(5, time);
+             preparedStatement.setString(6, invNum.getText());
             // execute select SQL stetement
             int rs = preparedStatement.executeUpdate();
             
@@ -854,65 +517,251 @@ public class salesman extends Application {
         } finally {
             
             if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                preparedStatement.close();
             }
             
             if (dbConnection != null) {
-                try {
-                    dbConnection.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                dbConnection.close();
             }
             
         }
-                    }
-                }
-
-                
-            });
-        }
         
-        private String getString() {
-            return getItem() == null ? "" : getItem().toString();
+    }
+    void insertIntoextra(String itemname,int qty,double price,String desc,String date) throws SQLException{
+     Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "INSERT INTO `extra`(`item_name`, `qty`, `price`, `description`, `date`,`invoiceNum`) VALUES"
+                + "(?,?,?,?,?,?)";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            preparedStatement.setString(1, itemname);
+            preparedStatement.setInt(2, qty);
+            preparedStatement.setDouble(3, price);
+              preparedStatement.setString(4, desc);
+            preparedStatement.setString(5, date);
+            preparedStatement.setString(6, invNum.getText());
+            // execute select SQL stetement
+            int rs = preparedStatement.executeUpdate();
+            
+            
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
         }
         
     }
-    void selectCustomerFrom(){
+    //modify to table item (qty)
+    void updatetotable(String S) throws SQLException {
+        
         Connection dbConnection = null;
         PreparedStatement preparedStatement = null;
         
-        String selectSQL = "SELECT * FROM salesman";
+        String selectSQL = "update  items set qty = ? where barcode = ? or name = ?";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            preparedStatement.setInt(1, itemqty);
+            preparedStatement.setString(2, S);
+            preparedStatement.setString(3, S);
+            // execute select SQL stetement
+            int rs = preparedStatement.executeUpdate();
+            
+            
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        
+    }
+    //delete from transaction table  if i make remove item
+  void deletFromtrans(String S,int qtyValue) throws SQLException {
+        
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+         PreparedStatement preparedStatement1 = null;
+        String selectSQL = "delete from transaction where item_name = ?";
+         String selectSQL1 = "update  items set qty = ? where barcode = ? or name = ?";
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+             preparedStatement1 = dbConnection.prepareStatement(selectSQL1);
+            preparedStatement.setString(1, S);
+            preparedStatement1.setInt(1, qtyValue);
+            preparedStatement1.setString(2, S);
+            preparedStatement1.setString(3, S);
+            // execute select SQL stetement
+            int rs = preparedStatement.executeUpdate();
+            int rs1 = preparedStatement1.executeUpdate();
+            
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        
+    }  
+  
+   //delete from extra  table  if i make remove item
+  void deletFromextra(String S) throws SQLException {
+        
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "delete from extra where item_name = ?";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            
+            preparedStatement.setString(1, S);
+            // execute select SQL stetement
+            int rs = preparedStatement.executeUpdate();
+            
+            
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        
+    }
+  
+   void checkItemQty(String S) throws SQLException {
+        
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "SELECT * FROM items WHERE barcode = ? or name = ?";
+        
+        try {
+            dbConnection = connection.getDBConnection();
+            preparedStatement = dbConnection.prepareStatement(selectSQL);
+            preparedStatement.setString(1, S);
+            preparedStatement.setString(2, S);
+            // execute select SQL stetement
+            ResultSet rs = preparedStatement.executeQuery();
+            String result = null;
+            int fond;
+            if (rs.next()) {
+                 itemqty1=rs.getInt("qty");
+                
+          
+            }
+            else{
+                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Message");
+                alert.setHeaderText("Item not found");
+                alert.setContentText("Item not found");
+                
+                alert.showAndWait();
+            }
+            
+        } catch (SQLException e) {
+            
+            System.out.println(e.getMessage());
+            
+        } finally {
+            
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+            
+        }
+        
+    }
+   String getInvNum() throws SQLException {
+        
+        Connection dbConnection = null;
+        PreparedStatement preparedStatement = null;
+        
+        String selectSQL = "SELECT COUNT(*) FROM transaction";
         
         try {
             dbConnection = connection.getDBConnection();
             preparedStatement = dbConnection.prepareStatement(selectSQL);
            
+            // execute select SQL stetement
             ResultSet rs = preparedStatement.executeQuery();
-            
-            while (rs.next()) {
-              data.add(new Person(String.valueOf(rs.getInt("idsalesman")),rs.getString("fname"), rs.getString("lname"), 
-                      rs.getString("company"), rs.getString("str1"), 
-                      rs.getString("city"), rs.getString("zip"), rs.getString("fax"), rs.getString("phone"),
-                      rs.getString("str2"), rs.getString("state"), rs.getString("country"), rs.getString("type")));
+            String result = null;
+            int fond;
+            if (rs.next()) {
+                 return rs.getString(1);
+                
+          
             }
-        }
+           
             
-            
-        catch (SQLException e) {
+        } catch (SQLException e) {
             
             System.out.println(e.getMessage());
-           
+            
         } finally {
             
-          
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+            
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
             
         }
+        return null;
         
     }
-    
 }
