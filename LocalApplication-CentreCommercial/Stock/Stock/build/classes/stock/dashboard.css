@@ -1,0 +1,139 @@
+.root {
+    -fx-background-image: url("dash_back.jpg");
+    -fx-background-size: cover;
+}
+.default-color0.chart-pie { -fx-pie-color: #ffd700; }
+.default-color1.chart-pie { -fx-pie-color: #ffa500; }
+.default-color2.chart-pie { -fx-pie-color: #860061; }
+.default-color3.chart-pie { -fx-pie-color: #adff2f; }
+.default-color4.chart-pie { -fx-pie-color: #ff5700; }
+ 
+.chart-pie-label-line {
+    -fx-stroke: #8b4513;
+    -fx-fill: #8b4513;
+}
+ 
+.chart-pie-label {
+    -fx-fill: #8b4513;
+    -fx-font-size: 1em;
+} 
+.chart-legend {
+   -fx-background-color:  #fafad2;
+   -fx-stroke: #daa520;
+}
+.chart {
+    -fx-padding: 10px;
+    -fx-background-image: url("icon.png");   
+}
+.chart-content {
+    -fx-padding: 10px;    
+}
+ 
+.chart-title {
+  -fx-text-fill: #4682b4;
+  -fx-font-size: 1.6em;
+}
+ 
+.axis-label {
+  -fx-text-fill: #4682b4;
+}
+ 
+.chart-legend {
+   -fx-background-color:  transparent;
+   -fx-padding: 20px;
+}
+ 
+.chart-legend-item-symbol{
+   -fx-background-radius: 0;
+}
+ 
+.chart-legend-item{
+    -fx-text-fill: #191970;
+}
+ 
+.chart-plot-background {
+    -fx-background-color: #e2ecfe;
+}
+.chart-vertical-grid-lines {
+    -fx-stroke: #3278fa;
+}
+.chart-horizontal-grid-lines {
+    -fx-stroke: #3278fa;
+}
+.chart-alternative-row-fill {
+    -fx-fill: #99bcfd;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}
+.default-color0.chart-area-symbol { -fx-background-color: #e9967a, #ffa07a; }
+.default-color1.chart-area-symbol { -fx-background-color: #f0e68c, #fffacd; }
+.default-color2.chart-area-symbol { -fx-background-color: #dda0dd, #d8bfd855; }
+ 
+.default-color0.chart-series-area-line { -fx-stroke: #e9967a; }
+.default-color1.chart-series-area-line { -fx-stroke: #f0e68c; }
+.default-color2.chart-series-area-line { -fx-stroke: #dda0dd; }
+ 
+.default-color0.chart-series-area-fill { -fx-fill: #ffa07a55; }
+.default-color1.chart-series-area-fill { -fx-fill: #fffacd55; }
+.default-color2.chart-series-area-fill { -fx-fill: #d8bfd855; }
+.table-view{
+   -fx-background-color: transparent;
+}
+
+.table-view:focused{
+    -fx-background-color: transparent;
+}
+
+/* Spaltenköpfe
+    Struktur column-header-background -> column-header */
+
+.table-view .column-header-background{
+    -fx-background-color: linear-gradient(#131313 0%, #424141 100%);
+}
+
+.table-view .column-header-background .label{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: green;
+}
+
+.table-row-cell{
+    -fx-background-color: -fx-table-cell-border-color, lightblue;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em; /* 0 */
+}
+
+.table-row-cell:odd{
+    -fx-background-color: -fx-table-cell-border-color, lightblue;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.0em; /* 0 */  
+}
+
+.table-row-cell:selected {
+    -fx-background-color: greenyellow;
+    -fx-background-insets: 0;
+    -fx-background-radius: 1;
+}
+
+.table-view > .virtual-flow > .scroll-bar:vertical,
+.table-view > .virtual-flow > .scroll-bar:vertical > .track,
+.table-view > .virtual-flow > .scroll-bar:vertical > .track-background, 
+.table-view > .virtual-flow > .scroll-bar:horizontal,
+.table-view > .virtual-flow > .scroll-bar:horizontal > .track,
+.table-view > .virtual-flow > .scroll-bar:horizontal > .track-background {
+    -fx-background-color: transparent;
+}
+
+
+
+.table-view > .virtual-flow > .scroll-bar > .increment-button, 
+.table-view > .virtual-flow > .scroll-bar > .decrement-button {
+    -fx-opacity: 0;
+}

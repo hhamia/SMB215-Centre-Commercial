@@ -1,0 +1,8 @@
+.root {
+    -fx-background-image: url("dash_back.jpg");
+    -fx-background-size: cover;
+}
+.label{
+    -fx-font-size:20px;
+}
+

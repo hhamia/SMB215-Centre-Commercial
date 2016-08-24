@@ -1,0 +1,35 @@
+.root {
+    -fx-background-image: url("dash_back.jpg");
+    -fx-background-size: cover;
+}
+Button {
+   -fx-background-color: 
+        #3c7fb1,
+        linear-gradient(#fafdfe, #e8f5fc),
+        linear-gradient(#eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);
+    -fx-background-insets: 0,1,2;
+    -fx-background-radius: 3,2,1;
+    
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+}
+Button:pressed {
+    
+    -fx-background-insets: 2 0 0 0,2 0 3 0, 2 0 4 0, 2 0 5 0;
+}
+Button:hover {
+    -fx-background-color: 
+        #3c7fb1,
+        linear-gradient(#fafdfe, #e8f5fc),
+        linear-gradient(#eaf61d 0%, #d9fffc 49%, #bre6fd 50%, #a7d9f5 100%);
+    
+}
+
+Label{
+    -fx-font-size:15px;
+    -fx-text-fill:red;
+}
+TextField{
+   -fx-font-size:15px;
+   -fx-text-fill:red;
+}
