@@ -14,3 +14,5 @@ Objectif du projet on général l'objectif principale du projet et de gestion du
 
  1-Application local l'objectif de cette application et de gère les produit de chaque point d'achat elle permet de: -Administration et gestion des stocks -La possibilité de traiter les marchandises par code à barres
 •gestion des articles d'achat, vente -contrôler et gère les client, supplier , fournisseurs. -gestion des articles, et du produits et du services -Imprimer factures, Imprimer un reçu -le rattachement d’indicateurs à chaque produit suivi en stock : stock minimum, stock maximum, -une partie comptabilité pour chaque point d'achat.
+
+2-Application web cette application a pour but ,création de page web pour chaque point d'achat et elle permet de: -Présentation des produits sur la page web. -au client de faire des achat en ligne . -insert-update-delete les produits et les articles. -permet au fournisseurs de faire une réservation des produit en ligne. -permet au client du center commercial de faire une réservation en ligne des film et sa place dans cinéma. -réservation online pour les client sa place son ordre dans les restaurant.
